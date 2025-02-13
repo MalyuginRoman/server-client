@@ -1,11 +1,15 @@
 #include <iostream>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <inaddr.h>
+//#include <WinSock2.h>
+//#include <WS2tcpip.h>
+//#include <inaddr.h>
 #include <stdio.h>
 #include <vector>
-
-#pragma comment(lib, "ws2_32.lib")
+//#pragma comment(lib, "ws2_32.lib")
+#include <netinet/in.h> //structure for storing address information 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <sys/socket.h> //for socket APIs 
+#include <sys/types.h> 
 
 using namespace std;
 
