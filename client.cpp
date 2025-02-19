@@ -4,6 +4,7 @@
 #include <inaddr.h>
 #include <stdio.h>
 #include <vector>
+#include <QString>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -18,8 +19,24 @@ std::vector <char> clearBuf(std::vector <char> result)
     return result;
 }
 
+std::string convert_char_to_string(std::vector <char> c, std::string result)
+{
+    result = "";
+    int i = 0;
+    while(!c.empty())
+    {
+        if(c.at(i) != '\0' && c.at(i) != '\n')
+            result += c.at(i);
+        c.erase(c.begin());
+    }
+    return result;
+}
+
 int main(void)
 {
+std::cout << "_________________________________________________" << std::endl;
+std::cout << "        Start CLIENT 1                           " << std::endl;
+std::cout << "_________________________________________________" << std::endl;
 //--------------------------------------------------------------------------------
 // autorised
 //--------------------------------------------------------------------------------
@@ -150,7 +167,7 @@ int main(void)
     }
     //vector <char> servBuff(BUFF_SIZE_G), clientBuff(BUFF_SIZE_G);		// Buffers for sending and receiving data
     //short packet_size = 0;											// The size of sending / receiving packet in bytes
-    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
+    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Create game?"
     if (packet_size == SOCKET_ERROR) {
         cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
         closesocket(ClientSock_g);
@@ -168,7 +185,7 @@ int main(void)
         WSACleanup();
         return 1;
     }
-    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
+    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Number players:"
     if (packet_size == SOCKET_ERROR) {
         cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
         closesocket(ClientSock_g);
@@ -179,6 +196,8 @@ int main(void)
         cout << servBuff.data();
     clientBuff = clearBuf(clientBuff);
     fgets(clientBuff.data(), clientBuff.size(), stdin);
+    std::string numberPlayers;
+    numberPlayers = convert_char_to_string(clientBuff, numberPlayers);
     packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
     if (packet_size == SOCKET_ERROR) {
         cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
@@ -186,7 +205,7 @@ int main(void)
         WSACleanup();
         return 1;
     }
-    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
+    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
     if (packet_size == SOCKET_ERROR) {
         cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
         closesocket(ClientSock_g);
@@ -194,7 +213,63 @@ int main(void)
         return 1;
     }
     else
-        cout << servBuff.data() << endl;;
+        cout << servBuff.data() << endl;
+    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
+    if (packet_size == SOCKET_ERROR) {
+        cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+        closesocket(ClientSock_g);
+        WSACleanup();
+        return 1;
+    }
+    else
+        cout << servBuff.data();
+    clientBuff = clearBuf(clientBuff);
+    fgets(clientBuff.data(), clientBuff.size(), stdin);
+    packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
+    if (packet_size == SOCKET_ERROR) {
+        cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+        closesocket(ClientSock_g);
+        WSACleanup();
+        return 1;
+    }
+    std::string isConcrete;
+    isConcrete = convert_char_to_string(clientBuff, isConcrete);
+    std::string answer1 = "Yes";
+    if(isConcrete == answer1)
+    {
+        int numPlayers = std::stoi(numberPlayers);
+        for(int i = 0; i < numPlayers; i++)
+        {
+            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"
+            if (packet_size == SOCKET_ERROR) {
+                cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+                closesocket(ClientSock_g);
+                WSACleanup();
+                return 1;
+            }
+            else
+                cout << servBuff.data();
+            //packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
+            clientBuff = clearBuf(clientBuff);
+            fgets(clientBuff.data(), clientBuff.size(), stdin);
+            packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
+            if (packet_size == SOCKET_ERROR) {
+                cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+                closesocket(ClientSock_g);
+                WSACleanup();
+                return 1;
+            }
+        }
+        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"   // <== "Start creating game ..."
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_g);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data();
+    }
     closesocket(ClientSock_g);
     //}
     WSACleanup();
