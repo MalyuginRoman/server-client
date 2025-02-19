@@ -42,7 +42,9 @@ std::vector <char> clearBuf(std::vector <char> result)
 
 int main(void)
 {
-
+std::cout << "_________________________________________________" << std::endl;
+std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
+std::cout << "_________________________________________________" << std::endl;
     //Key constants
     const char IP_SERV[] = "10.124.40.14";	// Enter local Server IP address
     const int PORT_NUM = 650;				// Enter Open working server port
