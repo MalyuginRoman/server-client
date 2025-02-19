@@ -45,6 +45,9 @@ std::vector <char> clearBuf(std::vector <char> result)
 
 int main(void)
 {
+std::cout << "_________________________________________________" << std::endl;
+std::cout << "        Start GAME SERVER                        " << std::endl;
+std::cout << "_________________________________________________" << std::endl;
 
     //Key constants
     const char IP_SERV[] = "10.124.40.14";	// Enter local Server IP address
@@ -149,14 +152,18 @@ int main(void)
         short packet_size = 0;												// The size of sending / receiving packet in bytes
 
 //----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
+std::cout << "_________________________________________________" << std::endl;
+std::cout << "        Start GAME SERVER                        " << std::endl;
+std::cout << "_________________________________________________" << std::endl;
+        std::string answerYes = "Yes";
+        std::string answerNo  = "No" ;
         clientBuff = clearBuf(clientBuff);
         servBuff = clearBuf(servBuff);
         std::string answer = "Create game? ";
         clientBuff = convert_string_to_char(clientBuff, answer);
         std::cout << clientBuff.data();
-
         packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
         if (packet_size == SOCKET_ERROR)
         {
             std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
@@ -165,84 +172,204 @@ int main(void)
             WSACleanup();
             return 1;
         }
-
-
         packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
         std::string isCreating;
         isCreating = convert_char_to_string(servBuff, isCreating);
         std::cout << servBuff.data();
+//----------------------------------------------------------------------------------//
+        QString fileName;                                                           //
+//        QFile file;                                                                 //
+//        QTextStream stream;                                                         //
+        int numPlayers;                                                             //
+        //std::vector<int> VectorGameID;                                            // для верификации игры
+        int CurrentGameID = 0;                                                      // ID текущей игры (для записи в файл и конектов к ней)
+        std::vector<std::string> NamePlayers;                                       // для верификации игроков
+        //--------------------------------------------------------------------------// Write in file
+        std::string ToWriteInFile = std::to_string(CurrentGameID);                  //
+        fileName = "D:/Models/OTUS/server-client/game_status" +                     //
+                            QString::fromStdString(ToWriteInFile) + ".txt";         //
+        QFile file(fileName);                                                       //
+        if (!file.open( QIODevice::WriteOnly | QIODevice::Text )) {                 //
+            qDebug() << "Не удалось открыть файл»";                                 //
+            return 1;                                                               //
+        }                                                                           //
+        QTextStream stream(&file);                                                  //
+        //--------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------//
+        if(isCreating == answerYes)
+            {
+std::cout << "_________________________________________________" << std::endl;
+std::cout << "        Start creating GAME                      " << std::endl;
+std::cout << "_________________________________________________" << std::endl;
+            clientBuff = clearBuf(clientBuff);
+            answer = "Number players: ";
+            clientBuff = convert_string_to_char(clientBuff, answer);
+            std::cout << clientBuff.data();
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR)
+            {
+                std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ServSock);
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+            packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+            std::string numberPlayers;
+            numberPlayers = convert_char_to_string(servBuff, numberPlayers);
+            std::cout << servBuff.data();
 //----------------------------------------------------------------------------------
-        clientBuff = clearBuf(clientBuff);
-        answer = "Number players: ";
-        clientBuff = convert_string_to_char(clientBuff, answer);
-        std::cout << clientBuff.data();
-
-        packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
-        if (packet_size == SOCKET_ERROR)
-        {
-            std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ServSock);
-            closesocket(ClientConn);
-            WSACleanup();
-            return 1;
-        }
-        packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
-        std::string numberPlayers;
-        numberPlayers = convert_char_to_string(servBuff, numberPlayers);
-        std::cout << servBuff.data();
+            std::string answer2_1 = "1";
+            std::string answer2_2 = "2";
+            std::string answer2_3 = "3";
+            std::string answer2_4 = "4";
+            std::string answer2_5 = "5";
+            if(((numberPlayers == answer2_1) || (numberPlayers == answer2_2) || (numberPlayers == answer2_3) || (numberPlayers == answer2_4) || (numberPlayers == answer2_5))
+                    && (isCreating == answerYes))
+                answer = "Start creating game ...";
+            else
+            {
+                answer = "Your answers is false!";
+                shutdown(ClientConn, SD_BOTH);
+                closesocket(ServSock);
+                closesocket(ClientConn);
+                WSACleanup();
+                return 0;
+            }
+            clientBuff = clearBuf(clientBuff);
+            clientBuff = convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            std::cout << answer << std::endl;
 //----------------------------------------------------------------------------------
-        std::string answer1 = "Yes";
-        std::string answer2_1 = "1";
-        std::string answer2_2 = "2";
-        std::string answer2_3 = "3";
-        std::string answer2_4 = "4";
-        std::string answer2_5 = "5";
+            answer = "Need concrete players? ";
+            clientBuff = clearBuf(clientBuff);
+            clientBuff = convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            std::cout << answer << std::endl;
 
-        std::cout << "numberPlayers " << numberPlayers << std::endl;
-        std::cout << "isCreating " << isCreating << std::endl;
+            packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+            std::string isConcrete;
+            isConcrete = convert_char_to_string(servBuff, isConcrete);
 
-        if(((numberPlayers == answer2_1) || (numberPlayers == answer2_2) || (numberPlayers == answer2_3) || (numberPlayers == answer2_4) || (numberPlayers == answer2_5))
-                && (isCreating == answer1))
+            numPlayers = std::stoi(numberPlayers);
+            std::string SerialNumberPlayer;
+            if(isConcrete == answerYes)
+            {
+                for(int i = 0; i < numPlayers; i++)
+                {
+                    if(i == 0) SerialNumberPlayer = "first";
+                    else if(i == 1) SerialNumberPlayer = "second";
+                    else if(i == 2) SerialNumberPlayer = "third";
+                    else if(i == 3) SerialNumberPlayer = "fourth";
+                    else if(i == 4) SerialNumberPlayer = "fifth";
+                    answer = "Write " + SerialNumberPlayer + " players: ";
+                    clientBuff = clearBuf(clientBuff);
+                    clientBuff = convert_string_to_char(clientBuff, answer);
+                    packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+
+                    packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+                    std::string NameConcretePlayer;
+                    NameConcretePlayer = convert_char_to_string(servBuff, NameConcretePlayer);
+                    std::cout << SerialNumberPlayer << " : " << servBuff.data() << " ";
+                    NamePlayers.push_back(NameConcretePlayer);
+                }
+            }
             answer = "Start creating game ...";
+            clientBuff = clearBuf(clientBuff);
+            clientBuff = convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            stream << "Create game with ID : " << QString::fromStdString(ToWriteInFile) << endl;
+            QString strX = QString::fromStdString(numberPlayers);
+            stream << "Number players: " << strX << endl;
+            for(int i = 0; i < numPlayers; i++)
+            {
+                if(i == 0) SerialNumberPlayer = "first";
+                else if(i == 1) SerialNumberPlayer = "second";
+                else if(i == 2) SerialNumberPlayer = "third";
+                else if(i == 3) SerialNumberPlayer = "fourth";
+                else if(i == 4) SerialNumberPlayer = "fifth";
+                stream << QString::fromStdString(SerialNumberPlayer) << " : " << QString::fromStdString(NamePlayers.at(i)) << endl;
+            }
+            if (packet_size == SOCKET_ERROR)
+            {
+                std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ServSock);
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+        }
+        else if(isCreating == answerNo)
+        {
+            //...               // connecting to game
+            clientBuff = clearBuf(clientBuff);
+            answer = "Connection to Game?";
+            clientBuff = convert_string_to_char(clientBuff, answer);
+            std::cout << clientBuff.data();
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR)
+            {
+                std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ServSock);
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+            packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+            std::string isConection;
+            isConection = convert_char_to_string(servBuff, isConection);
+            if(isConection == answerYes)  // при подключении к игре пользователь прошел верификацию
+            {
+                // ....
+                answer = "Write your name: ";
+                clientBuff = clearBuf(clientBuff);
+                clientBuff = convert_string_to_char(clientBuff, answer);
+                packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+                std::string UserName;
+                UserName = convert_char_to_string(servBuff, UserName);
+                bool isPlayerConection = false;
+                for(int i = 0; i < numPlayers; i++)
+                {
+                    if(UserName == NamePlayers.at(i))
+                        isPlayerConection = true;
+                }
+                if(isPlayerConection == false)
+                    break;
+            }
+            else if(isConection == answerNo)  // при подключении к игре пользователь не прошел верификацию
+            {
+                // ....
+                break;
+            }
+        }
         else
+            {
+                std::cout << "Invalid answer " << std::endl;
+                closesocket(ServSock);
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+//----------------------------------------------------------------------------------
+        int max_round_count = 100;
+        int current_round = 0;
+        while(current_round < max_round_count)
         {
-            answer = "Your answers is false!";
-            shutdown(ClientConn, SD_BOTH);
-            closesocket(ServSock);
-            closesocket(ClientConn);
-            WSACleanup();
-            return 0;
-        }
-        clientBuff = clearBuf(clientBuff);
-        clientBuff = convert_string_to_char(clientBuff, answer);
-
-        packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
-        QString fileName = "D:/Models/OTUS/server-client/game_status.txt";
-        QFile file(fileName);
-        //file.rename("D:/Models/OTUS/server-client/game_status.txt");
-        QString A5 = QFileInfo(fileName).absoluteFilePath();
-        if (!file.open( QIODevice::WriteOnly | QIODevice::Text )) {
-            qDebug() << "Не удалось открыть файл»";
-            return 1;
-        }
-        QTextStream stream(&file);
-        stream << "Create game" << endl;
-        QString strX = QString::fromStdString(numberPlayers);
-        stream << "Number players: " << strX << endl;
-        file.close();
-
-        if (packet_size == SOCKET_ERROR)
-        {
-            std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ServSock);
-            closesocket(ClientConn);
-            WSACleanup();
-            return 1;
+            current_round++;
+std::cout << "_________________________________________________" << std::endl;
+stream << "_________________________________________________" << endl;
+if(current_round == 0) {
+std::cout << "        Start GAME (Round = 1)" << std::endl;
+stream << "        Start GAME (Round = 1)" << endl; }
+else {
+std::cout << "        Round = " << current_round << std::endl;
+stream << "        Round = " << current_round << endl; }
+std::cout << "_________________________________________________" << std::endl;
+stream << "_________________________________________________" << endl;
         }
         closesocket(ClientConn);
-//----------------------------------------------------------------------------------
+
+        file.close();
     }
 
     closesocket(ServSock);
