@@ -46,7 +46,7 @@ std::vector <char> clearBuf(std::vector <char> result)
 int main(void)
 {
 std::cout << "_________________________________________________" << std::endl;
-std::cout << "        Start GAME SERVER                        " << std::endl;
+std::cout << "        Start GAME Creator                       " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
 
     //Key constants
@@ -106,8 +106,23 @@ std::cout << "_________________________________________________" << std::endl;
     }
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
-
-    while (true)
+    std::string answerYes = "Yes";
+    std::string answerNo  = "No" ;
+    //--------------------------------------------------------------------------// Write in file
+    QString fileName;                                                           //
+    int CurrentGameID = 0;                                                      // ID текущей игры (для записи в файл и конектов к ней)
+    std::string ToWriteInFile = std::to_string(CurrentGameID);                  //
+    fileName = "D:/Models/OTUS/server-client/game_status." +                    //
+                        QString::fromStdString(ToWriteInFile) + ".txt";         //
+    QFile file(fileName);                                                       //
+    if (!file.open( QIODevice::WriteOnly | QIODevice::Text )) {                 //
+        qDebug() << "Не удалось открыть файл»";                                 //
+        return 1;                                                               //
+    }                                                                           //
+    QTextStream stream(&file);                                                  //
+    //--------------------------------------------------------------------------//
+    bool isWok = true;
+    while (isWok)                                                            // Цикл № 1 - для создания игра / определения наличия и формата доступа клиентов к игре
     {
         //Starting to listen to any Clients
         erStat = listen(ServSock, SOMAXCONN);
@@ -121,15 +136,11 @@ std::cout << "_________________________________________________" << std::endl;
         else {
             std::cout << "Listening..." << std::endl;
         }
-
         //Client socket creation and acception in case of connection
         sockaddr_in clientInfo;
-        ZeroMemory(&clientInfo, sizeof(clientInfo));	// Initializing clientInfo structure
-
+        ZeroMemory(&clientInfo, sizeof(clientInfo));                                // Initializing clientInfo structure
         int clientInfo_size = sizeof(clientInfo);
-
         SOCKET ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
-
         if (ClientConn == INVALID_SOCKET) {
             std::cout << "Client detected, but can't connect to a client. Error # " << WSAGetLastError() << std::endl;
             closesocket(ServSock);
@@ -140,24 +151,14 @@ std::cout << "_________________________________________________" << std::endl;
         else {
             std::cout << "Connection to a client established successfully" << std::endl;
             char clientIP[22];
-
             inet_ntop(AF_INET, &clientInfo.sin_addr, clientIP, INET_ADDRSTRLEN);	// Convert connected client's IP to standard string format
-
             std::cout << "Client connected with IP address " << clientIP << std::endl;
         }
-
         //Exchange text data between Server and Client. Disconnection if a client send "xxx"
-
-        std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);			// Creation of buffers for sending and receiving data
-        short packet_size = 0;												// The size of sending / receiving packet in bytes
-
+        std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);              // Creation of buffers for sending and receiving data
+        short packet_size = 0;                                                      // The size of sending / receiving packet in bytes
 //----------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------
-std::cout << "_________________________________________________" << std::endl;
-std::cout << "        Start GAME SERVER                        " << std::endl;
-std::cout << "_________________________________________________" << std::endl;
-        std::string answerYes = "Yes";
-        std::string answerNo  = "No" ;
         clientBuff = clearBuf(clientBuff);
         servBuff = clearBuf(servBuff);
         std::string answer = "Create game? ";
@@ -177,27 +178,11 @@ std::cout << "_________________________________________________" << std::endl;
         isCreating = convert_char_to_string(servBuff, isCreating);
         std::cout << servBuff.data();
 //----------------------------------------------------------------------------------//
-        QString fileName;                                                           //
-//        QFile file;                                                                 //
-//        QTextStream stream;                                                         //
         int numPlayers;                                                             //
-        //std::vector<int> VectorGameID;                                            // для верификации игры
-        int CurrentGameID = 0;                                                      // ID текущей игры (для записи в файл и конектов к ней)
         std::vector<std::string> NamePlayers;                                       // для верификации игроков
-        //--------------------------------------------------------------------------// Write in file
-        std::string ToWriteInFile = std::to_string(CurrentGameID);                  //
-        fileName = "D:/Models/OTUS/server-client/game_status" +                     //
-                            QString::fromStdString(ToWriteInFile) + ".txt";         //
-        QFile file(fileName);                                                       //
-        if (!file.open( QIODevice::WriteOnly | QIODevice::Text )) {                 //
-            qDebug() << "Не удалось открыть файл»";                                 //
-            return 1;                                                               //
-        }                                                                           //
-        QTextStream stream(&file);                                                  //
-        //--------------------------------------------------------------------------//
 //----------------------------------------------------------------------------------//
         if(isCreating == answerYes)
-            {
+        {
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start creating GAME                      " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
@@ -218,7 +203,7 @@ std::cout << "_________________________________________________" << std::endl;
             std::string numberPlayers;
             numberPlayers = convert_char_to_string(servBuff, numberPlayers);
             std::cout << servBuff.data();
-//----------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------//
             std::string answer2_1 = "1";
             std::string answer2_2 = "2";
             std::string answer2_3 = "3";
@@ -240,7 +225,7 @@ std::cout << "_________________________________________________" << std::endl;
             clientBuff = convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             std::cout << answer << std::endl;
-//----------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------//
             answer = "Need concrete players? ";
             clientBuff = clearBuf(clientBuff);
             clientBuff = convert_string_to_char(clientBuff, answer);
@@ -298,6 +283,7 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 1;
             }
+            CurrentGameID ++;
         }
         else if(isCreating == answerNo)
         {
@@ -343,38 +329,18 @@ std::cout << "_________________________________________________" << std::endl;
             }
         }
         else
-            {
-                std::cout << "Invalid answer " << std::endl;
-                closesocket(ServSock);
-                closesocket(ClientConn);
-                WSACleanup();
-                return 1;
-            }
-//----------------------------------------------------------------------------------
-        int max_round_count = 100;
-        int current_round = 0;
-        while(current_round < max_round_count)
         {
-            current_round++;
-std::cout << "_________________________________________________" << std::endl;
-stream << "_________________________________________________" << endl;
-if(current_round == 0) {
-std::cout << "        Start GAME (Round = 1)" << std::endl;
-stream << "        Start GAME (Round = 1)" << endl; }
-else {
-std::cout << "        Round = " << current_round << std::endl;
-stream << "        Round = " << current_round << endl; }
-std::cout << "_________________________________________________" << std::endl;
-stream << "_________________________________________________" << endl;
+            std::cout << "Invalid answer " << std::endl;
+            //closesocket(ServSock);
+            isWok = false;
+            closesocket(ClientConn);
+            WSACleanup();
+            return 1;
         }
-        closesocket(ClientConn);
-
         file.close();
+        closesocket(ClientConn);
     }
-
     closesocket(ServSock);
     WSACleanup();
-
     return 0;
-
 }
