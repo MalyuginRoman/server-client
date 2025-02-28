@@ -56,8 +56,6 @@ std::cout << "_________________________________________________" << std::endl;
     }
     else
         cout << "WinSock initialization is OK" << endl;
-    //while (true)
-    //{
     SOCKET ClientSock_a = socket(AF_INET, SOCK_STREAM, 0);
     if (ClientSock_a == INVALID_SOCKET) {
         cout << "Error initialization socket # " << WSAGetLastError() << endl;
@@ -69,60 +67,71 @@ std::cout << "_________________________________________________" << std::endl;
     servInfo.sin_family = AF_INET;
     servInfo.sin_addr = ip_to_num;
     servInfo.sin_port = htons(SERVER_PORT_NUM_A);
-    erStat = connect(ClientSock_a, (sockaddr*)&servInfo, sizeof(servInfo));
-    if (erStat != 0) {
-        cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
-    }
     vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);           // Buffers for sending and receiving data
     short packet_size = 0;												// The size of sending / receiving packet in bytes
-    packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
-    if (packet_size == SOCKET_ERROR) {
-        cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
+    bool isNeedAutorization = true;
+    while(isNeedAutorization)
+    {
+        erStat = connect(ClientSock_a, (sockaddr*)&servInfo, sizeof(servInfo));
+        if (erStat != 0) {
+            cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data();
+        clientBuff = clearBuf(clientBuff);
+        fgets(clientBuff.data(), clientBuff.size(), stdin);                     // <== User write login
+        packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your password: "
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data();
+        clientBuff = clearBuf(clientBuff);
+        fgets(clientBuff.data(), clientBuff.size(), stdin);                     // <== User write password
+        packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
+        std::string answer;
+        answer = convert_char_to_string(servBuff, answer);
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_a);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data() << endl;
+        std::string isGood = "Your autorized!";
+        if(answer == isGood)
+            isNeedAutorization = false;
+        clientBuff = clearBuf(clientBuff);
+        servBuff = clearBuf(servBuff);
     }
-    else
-        cout << servBuff.data();
-    clientBuff = clearBuf(clientBuff);
-    fgets(clientBuff.data(), clientBuff.size(), stdin);
-    packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
-    if (packet_size == SOCKET_ERROR) {
-        cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
-    }
-    packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
-    if (packet_size == SOCKET_ERROR) {
-        cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
-    }
-    else
-        cout << servBuff.data();
-    clientBuff = clearBuf(clientBuff);
-    fgets(clientBuff.data(), clientBuff.size(), stdin);
-    packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
-    if (packet_size == SOCKET_ERROR) {
-        cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
-    }
-    packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
-    if (packet_size == SOCKET_ERROR) {
-        cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
-        closesocket(ClientSock_a);
-        WSACleanup();
-        return 1;
-    }
-    else
-        cout << servBuff.data() << endl;;
     closesocket(ClientSock_a);
     //}
     WSACleanup();
@@ -268,9 +277,95 @@ std::cout << "_________________________________________________" << std::endl;
             return 1;
         }
         else
-            cout << servBuff.data();
+            cout << servBuff.data() << endl;
     }
     closesocket(ClientSock_g);
+//-------------------------------------------------------------------------------- Start game - UserAction raund by raund
+// create game
+//--------------------------------------------------------------------------------
+    //Key constants
+    const char SERVER_IP_C[] = "10.124.40.14";		// Enter IPv4 address of Server
+    const short SERVER_PORT_NUM_C = 8008;			// Enter Listening port on Server side
+    //const short BUFF_SIZE = 1024;					// Maximum size of buffer for exchange info between server and client
+    //int erStat;									// For checking errors in sockets functions
+    //in_addr ip_to_num;
+    inet_pton(AF_INET, SERVER_IP_C, &ip_to_num);
+    //WSADATA wsData;
+    erStat = WSAStartup(MAKEWORD(2,2), &wsData);
+    if (erStat != 0) {
+        cout << "Error WinSock version initializaion #";
+        cout << WSAGetLastError();
+        return 1;
+    }
+    else
+        cout << "WinSock initialization is OK" << endl;
+    //while (true)
+    //{
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+    int max_round_count = 100;
+    int current_round = 0;
+    while(current_round < max_round_count)
+    {
+        SOCKET ClientSock_c = socket(AF_INET, SOCK_STREAM, 0);
+        if (ClientSock_c == INVALID_SOCKET) {
+            cout << "Error initialization socket # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+        }
+        //sockaddr_in servInfo;
+        ZeroMemory(&servInfo, sizeof(servInfo));
+        servInfo.sin_family = AF_INET;
+        servInfo.sin_addr = ip_to_num;
+        servInfo.sin_port = htons(SERVER_PORT_NUM_C);
+        erStat = connect(ClientSock_c, (sockaddr*)&servInfo, sizeof(servInfo));
+        if (erStat != 0) {
+            cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+            return 1;
+        }
+        current_round++;
+        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "________"
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data() << endl;
+        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Round = ..."
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data() << endl;
+        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write your action: "
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+            return 1;
+        }
+        else
+            cout << servBuff.data() << endl;
+        clientBuff = clearBuf(clientBuff);
+        fgets(clientBuff.data(), clientBuff.size(), stdin);
+        packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
+        if (packet_size == SOCKET_ERROR) {
+            cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+            closesocket(ClientSock_c);
+            WSACleanup();
+            return 1;
+        }
+        closesocket(ClientSock_c);
+    }
+//--------------------------------------------------------------------------------
+    //closesocket(ClientSock_c);
     //}
     WSACleanup();
 //--------------------------------------------------------------------------------
