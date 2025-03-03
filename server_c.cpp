@@ -49,7 +49,7 @@ std::vector <char> clearBuf(std::vector <char> result)
     for(int i = BUFF_SIZE - 1; i > -1; i--)
         result.emplace(result.begin(), '\0');
     return result;
-} /**/
+}
 
 std::string split(std::string str, char del)
 {
@@ -69,11 +69,11 @@ std::string split(std::string str, char del)
     return result;
 }
 
-std::list<std::string> readGameConfig()
+std::list<std::list<std::string>> readGameConfig()
 {
     fs::path current_path = fs::current_path();
     fs::path file_path(current_path);
-    std::list<std::string> list1;
+    std::list<std::list<std::string>> list1;
     // Рекурсивный обход директории
     std::cout << file_path.parent_path() << std::endl;
 
@@ -88,45 +88,53 @@ std::list<std::string> readGameConfig()
         if (readFile.is_open())
         {
             std::cout << "File " << readFileName << " be opened" << std::endl;
+            std::list<std::string> list2;
+            list2.push_back(readFileName);
             std::string str;
             while(readFile >> str)
             {
-                if(str == "Create" /*game with ID : "*/)
+                if(str == "Game" /*status = "*/)
+                {
+                    readFile >> str >> str >> str;
+                    list2.push_back(str);
+                }
+                else if(str == "Create" /*game with ID : "*/)
                 {
                     readFile >> str >> str >> str >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "Number" /*players: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "first" /*: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "second" /*: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "third" /*: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "fourth" /*: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
                 else if(str == "fifth" /*: "*/)
                 {
                     readFile >> str >> str;
-                    list1.push_back(str);
+                    list2.push_back(str);
                 }
             }
+            list1.push_back(list2);
         }
         readFile.close();
     }
@@ -135,14 +143,6 @@ std::list<std::string> readGameConfig()
 
 int main(void)
 {
-    std::list<std::string> list_game_config = readGameConfig();
-
-    std::cout << list_game_config.size() << std::endl;
-    while(!list_game_config.empty())
-    {
-        std::cout << list_game_config.front() << std::endl;
-        list_game_config.pop_front();
-    }
     std::cout << "_________________________________________________" << std::endl;
     std::cout << "        Start GAME Server                        " << std::endl;
     std::cout << "_________________________________________________" << std::endl;
@@ -204,25 +204,26 @@ int main(void)
     }
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
-//--------------------------------------------------------------------------// Write in file
-//QString fileName;                                                           //
-//int CurrentGameID = 0;                                                      // ID текущей игры (для записи в файл и конектов к ней)
-//std::string ToWriteInFile = std::to_string(CurrentGameID);                  //
-//fileName = "D:/Models/OTUS/server-client/game_status" +                     //
-//                    QString::fromStdString(ToWriteInFile) + "_" +           //
-//                    QString::fromStdString(ToWriteInFile) + ".txt";         //
-//QFile file(fileName);                                                       //
-//if (!file.open( QIODevice::WriteOnly | QIODevice::Text )) {                 //
-//    qDebug() << "Не удалось открыть файл»";                                 //
-//    return 1;                                                               //
-//}                                                                           //
-//QTextStream stream(&file);                                                  //
+//--------------------------------------------------------------------------//
 std::string answer;                                                         //
 //--------------------------------------------------------------------------//
     while (true)                                                            // Цикл № 2 - отправка сообщений во время проведения игры
     {
         int max_round_count = 100;
         int current_round = 0;
+//--------------------------------------------------------------------------//
+std::list<std::list<std::string>> list_game_config = readGameConfig();      // чтение файлов с конфигарацией игр
+std::cout << list_game_config.size() << std::endl;                          //
+while(!list_game_config.empty())                                            //
+{                                                                           //
+    while(!list_game_config.front().empty())                                //
+    {                                                                       //
+        std::cout << list_game_config.front().front() << std::endl;         //
+        list_game_config.front().pop_front();                               //
+    }                                                                       //
+    list_game_config.pop_front();                                           //
+}                                                                           //
+//--------------------------------------------------------------------------//
         while(current_round < max_round_count)
         {
             //Starting to listen to any Clients
