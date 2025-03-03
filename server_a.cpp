@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <vector>
 
+
 #pragma comment(lib, "Ws2_32.lib")
 
 std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
