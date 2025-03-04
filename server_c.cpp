@@ -15,7 +15,6 @@
 #include <filesystem>
 #include <list>
 
-//using namespace std;
 namespace fs = std::experimental::filesystem;
 
 std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
@@ -28,7 +27,6 @@ std::vector <char> convert_string_to_char(std::vector <char> result, std::string
     }
     return result;
 }
-
 std::string convert_char_to_string(std::vector <char> c, std::string result)
 {
     result = "";
@@ -41,7 +39,6 @@ std::string convert_char_to_string(std::vector <char> c, std::string result)
     }
     return result;
 }
-
 std::vector <char> clearBuf(std::vector <char> result)
 {
     result.erase(result.begin(), result.end());
@@ -50,7 +47,6 @@ std::vector <char> clearBuf(std::vector <char> result)
         result.emplace(result.begin(), '\0');
     return result;
 }
-
 std::string split(std::string str, char del)
 {
     std::string result = "";
@@ -68,7 +64,6 @@ std::string split(std::string str, char del)
     std::cout << std::endl;
     return result;
 }
-
 std::list<std::list<std::string>> readGameConfig()
 {
     fs::path current_path = fs::current_path();
@@ -76,11 +71,9 @@ std::list<std::list<std::string>> readGameConfig()
     std::list<std::list<std::string>> list1;
     // Рекурсивный обход директории
     std::cout << file_path.parent_path() << std::endl;
-
     char del = '/';
     std::string directory = split(file_path.parent_path().generic_string(), del);
     std::cout << directory << std::endl;
-
     for (auto &p : fs::recursive_directory_iterator(directory))
     {
         std::string readFileName = directory + p.path().filename().generic_string();
@@ -146,24 +139,19 @@ int main(void)
     std::cout << "_________________________________________________" << std::endl;
     std::cout << "        Start GAME Server                        " << std::endl;
     std::cout << "_________________________________________________" << std::endl;
-
     //Key constants
     const char IP_SERV[] = "10.124.40.14";	// Enter local Server IP address
     const int PORT_NUM = 8008;				// Enter Open working server port
     const short BUFF_SIZE = 1024;			// Maximum size of buffer for exchange info between server and client
-
     // Key variables for all program
     int erStat;								// Keeps socket errors status
-
     //IP in string format to numeric format for socket functions. Data is in "ip_to_num"
     in_addr ip_to_num;
     erStat = inet_pton(AF_INET, IP_SERV, &ip_to_num);
-
     if (erStat <= 0) {
         std::cout << "Error in IP translation to special numeric format" << std::endl;
         return 1;
     }
-
     // WinSock initialization
     WSADATA wsData;
     erStat = WSAStartup(MAKEWORD(2,2), &wsData);
@@ -174,7 +162,6 @@ int main(void)
     }
     else
         std::cout << "WinSock initialization is OK" << std::endl;
-
     // Server socket initialization
     SOCKET ServSock = socket(AF_INET, SOCK_STREAM, 0);
     if (ServSock == INVALID_SOCKET) {
@@ -185,17 +172,13 @@ int main(void)
     }
     else
         std::cout << "Server socket initialization is OK" << std::endl;
-
     // Server socket binding
     sockaddr_in servInfo;
     ZeroMemory(&servInfo, sizeof(servInfo));	// Initializing servInfo structure
-
     servInfo.sin_family = AF_INET;
     servInfo.sin_addr = ip_to_num;
     servInfo.sin_port = htons(PORT_NUM);
-
     erStat = bind(ServSock, (sockaddr*)&servInfo, sizeof(servInfo));
-
     if ( erStat != 0 ) {
         std::cout << "Error Socket binding to server info. Error # " << WSAGetLastError() << std::endl;
         closesocket(ServSock);
@@ -204,31 +187,28 @@ int main(void)
     }
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
-//--------------------------------------------------------------------------//
 std::string answer;                                                         //
-//--------------------------------------------------------------------------//
     while (true)                                                            // Цикл № 2 - отправка сообщений во время проведения игры
     {
         int max_round_count = 100;
         int current_round = 0;
 //--------------------------------------------------------------------------//
-std::list<std::list<std::string>> list_game_config = readGameConfig();      // чтение файлов с конфигарацией игр
-std::cout << list_game_config.size() << std::endl;                          //
-while(!list_game_config.empty())                                            //
-{                                                                           //
-    while(!list_game_config.front().empty())                                //
-    {                                                                       //
-        std::cout << list_game_config.front().front() << std::endl;         //
-        list_game_config.front().pop_front();                               //
-    }                                                                       //
-    list_game_config.pop_front();                                           //
-}                                                                           //
+//std::list<std::list<std::string>> list_game_config = readGameConfig();      // чтение файлов с конфигарацией игр
+//std::cout << list_game_config.size() << std::endl;                          //
+//while(!list_game_config.empty())                                            //
+//{                                                                           //
+//    while(!list_game_config.front().empty())                                //
+//    {                                                                       //
+//        std::cout << list_game_config.front().front() << std::endl;         //
+//        list_game_config.front().pop_front();                               //
+//    }                                                                       //
+//    list_game_config.pop_front();                                           //
+//}                                                                           //
 //--------------------------------------------------------------------------//
         while(current_round < max_round_count)
         {
             //Starting to listen to any Clients
             erStat = listen(ServSock, SOMAXCONN);
-
             if ( erStat != 0 ) {
                 std::cout << "Can't start to listen to. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ServSock);
@@ -259,7 +239,6 @@ while(!list_game_config.empty())                                            //
             //Exchange text data between Server and Client. Disconnection if a client send "xxx"
             std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);              // Creation of buffers for sending and receiving data
             short packet_size = 0;                                                      // The size of sending / receiving packet in bytes
-
             current_round++;
 std::cout << "_________________________________________________" << std::endl;
 //stream << "_________________________________________________" << endl;
@@ -309,10 +288,8 @@ answer = "        Round = " + std::to_string(current_round);
             closesocket(ClientConn);
         }
     }
-
 //    file.close();
     closesocket(ServSock);
     WSACleanup();
-
     return 0;
 }
