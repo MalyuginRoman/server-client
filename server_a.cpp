@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <vector>
 
-
 #pragma comment(lib, "Ws2_32.lib")
 
 std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
@@ -40,7 +39,6 @@ std::vector <char> clearBuf(std::vector <char> result)
     return result;
 }
 
-
 int main(void)
 {
 std::cout << "_________________________________________________" << std::endl;
@@ -50,19 +48,15 @@ std::cout << "_________________________________________________" << std::endl;
     const char IP_SERV[] = "10.124.40.14";	// Enter local Server IP address
     const int PORT_NUM = 650;				// Enter Open working server port
     const short BUFF_SIZE = 1024;			// Maximum size of buffer for exchange info between server and client
-
     // Key variables for all program
     int erStat;								// Keeps socket errors status
-
     //IP in string format to numeric format for socket functions. Data is in "ip_to_num"
     in_addr ip_to_num;
     erStat = inet_pton(AF_INET, IP_SERV, &ip_to_num);
-
     if (erStat <= 0) {
         std::cout << "Error in IP translation to special numeric format" << std::endl;
         return 1;
     }
-
     // WinSock initialization
     WSADATA wsData;
     erStat = WSAStartup(MAKEWORD(2,2), &wsData);
@@ -73,7 +67,6 @@ std::cout << "_________________________________________________" << std::endl;
     }
     else
         std::cout << "WinSock initialization is OK" << std::endl;
-
     // Server socket initialization
     SOCKET ServSock = socket(AF_INET, SOCK_STREAM, 0);
     if (ServSock == INVALID_SOCKET) {
@@ -84,19 +77,14 @@ std::cout << "_________________________________________________" << std::endl;
     }
     else
         std::cout << "Server socket initialization is OK" << std::endl;
-
     bool isNeedAutorized = true;
-
     // Server socket binding
     sockaddr_in servInfo;
     ZeroMemory(&servInfo, sizeof(servInfo));	// Initializing servInfo structure
-
     servInfo.sin_family = AF_INET;
     servInfo.sin_addr = ip_to_num;
     servInfo.sin_port = htons(PORT_NUM);
-
     erStat = bind(ServSock, (sockaddr*)&servInfo, sizeof(servInfo));
-
     if ( erStat != 0 ) {
         std::cout << "Error Socket binding to server info. Error # " << WSAGetLastError() << std::endl;
         closesocket(ServSock);
@@ -105,12 +93,10 @@ std::cout << "_________________________________________________" << std::endl;
     }
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
-
     while(true)
     {
         //Starting to listen to any Clients
         erStat = listen(ServSock, SOMAXCONN);
-
         if ( erStat != 0 ) {
             std::cout << "Can't start to listen to. Error # " << WSAGetLastError() << std::endl;
             closesocket(ServSock);
@@ -120,7 +106,6 @@ std::cout << "_________________________________________________" << std::endl;
         else {
             std::cout << "Listening..." << std::endl;
         }
-
         //Client socket creation and acception in case of connection
         sockaddr_in clientInfo;
         ZeroMemory(&clientInfo, sizeof(clientInfo));	// Initializing clientInfo structure
@@ -159,8 +144,6 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 1;
             }
-
-
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientLogin;
             clientLogin = convert_char_to_string(servBuff, clientLogin);
@@ -170,7 +153,6 @@ std::cout << "_________________________________________________" << std::endl;
             anser = "Your password: ";
             clientBuff = convert_string_to_char(clientBuff, anser);
             std::cout << "Client password: ";
-
             if (clientBuff[0] == 'o' && clientBuff[1] == 'u' && clientBuff[2] == 't')
             {
                 shutdown(ClientConn, SD_BOTH);
@@ -179,9 +161,7 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 0;
             }
-
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
             if (packet_size == SOCKET_ERROR)
             {
                 std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
@@ -201,8 +181,7 @@ std::cout << "_________________________________________________" << std::endl;
             std::string username4 = "Barcelona";
             std::string username5 = "RealMadrid";
             std::string username6 = "ETyumencev";
-            std::string usersecrt = "123456789";
-
+            std::string usersecrt = "123";
             if(((clientLogin == username1) || (clientLogin == username2) || (clientLogin == username3) || (clientLogin == username4) || (clientLogin == username5) || (clientLogin == username6))
                     && (clientPassword == usersecrt))
             {
@@ -217,7 +196,6 @@ std::cout << "_________________________________________________" << std::endl;
             }
             clientBuff = clearBuf(clientBuff);
             clientBuff = convert_string_to_char(clientBuff, anser);
-
             if (clientBuff[0] == 'o' && clientBuff[1] == 'u' && clientBuff[2] == 't')
             {
                 shutdown(ClientConn, SD_BOTH);
@@ -226,9 +204,7 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 0;
             }
-
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
             if (packet_size == SOCKET_ERROR)
             {
                 std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
@@ -244,10 +220,7 @@ std::cout << "_________________________________________________" << std::endl;
         closesocket(ClientConn);
         isNeedAutorized = true;
     }
-
     closesocket(ServSock);
     WSACleanup();
-
     return 0;
-
 }
