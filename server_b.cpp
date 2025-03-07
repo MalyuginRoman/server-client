@@ -1,141 +1,17 @@
-#include <iostream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <stdio.h>
-#include <vector>
 #include <QString>
 #include <QDir>
 #include <QDebug>
 
 #pragma comment(lib, "Ws2_32.lib")
 
-#include <string>
-#include <fstream>
-#include <filesystem>
-#include <list>
-
-namespace fs = std::experimental::filesystem;
-std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
-{
-    size_t l = s.length();
-    for(int i = l - 1; i > -1; i--)
-    {
-        result.emplace(result.begin(), s.at(i));
-        result.erase(result.end() - 1);
-    }
-    return result;
-}
-std::string convert_char_to_string(std::vector <char> c, std::string result)
-{
-    result = "";
-    int i = 0;
-    while(!c.empty())
-    {
-        if(c.at(i) != '\0' && c.at(i) != '\n')
-            result += c.at(i);
-        c.erase(c.begin());
-    }
-    return result;
-}
-std::vector <char> clearBuf(std::vector <char> result)
-{
-    result.erase(result.begin(), result.end());
-    const short BUFF_SIZE = 1024;
-    for(int i = BUFF_SIZE - 1; i > -1; i--)
-        result.emplace(result.begin(), '\0');
-    return result;
-}
-std::string split(std::string str, char del)
-{
-    std::string result = "";
-    std::string temp = "";
-    for(int i=0; i<(int)str.size(); i++)
-    {
-        if(str[i] != del)
-            temp += str[i];
-        else
-        {
-            result += temp + "/";
-            temp = "";
-        }
-    }
-    std::cout << std::endl;
-    return result;
-}
-std::list<std::list<std::string>> readGameConfig()
-{
-    fs::path current_path = fs::current_path();
-    fs::path file_path(current_path);
-    std::list<std::list<std::string>> list1;
-    // Рекурсивный обход директории
-    std::cout << file_path.parent_path() << std::endl;
-
-    char del = '/';
-    std::string directory = split(file_path.parent_path().generic_string(), del);
-    std::cout << directory << std::endl;
-
-    for (auto &p : fs::recursive_directory_iterator(directory))
-    {
-        std::string readFileName = directory + p.path().filename().generic_string();
-        std::fstream readFile(readFileName);
-        if (readFile.is_open())
-        {
-            std::cout << "File " << readFileName << " be opened" << std::endl;
-            std::list<std::string> list2;
-            list2.push_back(readFileName);
-            std::string str;
-            while(readFile >> str)
-            {
-                if(str == "Game" /*status = "*/)
-                {
-                    readFile >> str >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "Create" /*game with ID : "*/)
-                {
-                    readFile >> str >> str >> str >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "Number" /*players: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "first" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "second" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "third" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "fourth" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "fifth" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-            }
-            list1.push_back(list2);
-        }
-        readFile.close();
-    }
-    return list1;
-}
+#include "dop_function.h"
 
 int main(void)
 {
+    dop_function df;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start GAME Creator                       " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
@@ -256,10 +132,10 @@ std::cout << "_________________________________________________" << std::endl;
             closesocket(ClientConn);
         }
         std::string playerName;
-        playerName = convert_char_to_string(servBuff, playerName);
+        playerName = df.convert_char_to_string(servBuff, playerName);
         std::string answer = "What are you want? ";
-        clientBuff = clearBuf(clientBuff);
-        clientBuff = convert_string_to_char(clientBuff, answer);
+        clientBuff = df.clearBuf(clientBuff);
+        clientBuff = df.convert_string_to_char(clientBuff, answer);
         std::cout << clientBuff.data() << std::endl;
         packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
         if (packet_size == SOCKET_ERROR)
@@ -267,10 +143,10 @@ std::cout << "_________________________________________________" << std::endl;
             std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
             closesocket(ClientConn);
         }
-        clientBuff = clearBuf(clientBuff);
-        servBuff = clearBuf(servBuff);
+        clientBuff = df.clearBuf(clientBuff);
+        servBuff = df.clearBuf(servBuff);
         answer = "Create game? ";
-        clientBuff = convert_string_to_char(clientBuff, answer);
+        clientBuff = df.convert_string_to_char(clientBuff, answer);
         std::cout << clientBuff.data();
         packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
         if (packet_size == SOCKET_ERROR)
@@ -280,7 +156,7 @@ std::cout << "_________________________________________________" << std::endl;
         }
         packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
         std::string isCreating;
-        isCreating = convert_char_to_string(servBuff, isCreating);
+        isCreating = df.convert_char_to_string(servBuff, isCreating);
         std::cout << servBuff.data();
 //----------------------------------------------------------------------------------//
         int numPlayers;                                                             //
@@ -302,9 +178,9 @@ std::cout << "_________________________________________________" << std::endl;
             }                                                                           //
             QTextStream stream(&file);                                                  //
             //--------------------------------------------------------------------------//
-            clientBuff = clearBuf(clientBuff);
+            clientBuff = df.clearBuf(clientBuff);
             answer = "Number players: ";
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << clientBuff.data();
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR)
@@ -314,7 +190,7 @@ std::cout << "_________________________________________________" << std::endl;
             }
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string numberPlayers;
-            numberPlayers = convert_char_to_string(servBuff, numberPlayers);
+            numberPlayers = df.convert_char_to_string(servBuff, numberPlayers);
             std::cout << servBuff.data();
             //--------------------------------------------------------------------------//
             std::string answer2_1 = "1";
@@ -331,19 +207,19 @@ std::cout << "_________________________________________________" << std::endl;
                 shutdown(ClientConn, SD_BOTH);
                 closesocket(ClientConn);
             }
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             std::cout << answer << std::endl;
             //--------------------------------------------------------------------------//
             answer = "Need concrete players? ";
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             std::cout << answer << std::endl;
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string isConcrete;
-            isConcrete = convert_char_to_string(servBuff, isConcrete);
+            isConcrete = df.convert_char_to_string(servBuff, isConcrete);
             numPlayers = std::stoi(numberPlayers);
             std::string SerialNumberPlayer;
             if(isConcrete == answerYes)
@@ -356,20 +232,19 @@ std::cout << "_________________________________________________" << std::endl;
                     else if(i == 3) SerialNumberPlayer = "fourth";
                     else if(i == 4) SerialNumberPlayer = "fifth";
                     answer = "Write " + SerialNumberPlayer + " players: ";
-                    clientBuff = clearBuf(clientBuff);
-                    clientBuff = convert_string_to_char(clientBuff, answer);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
                     packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
                     packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
                     std::string NameConcretePlayer;
-                    NameConcretePlayer = convert_char_to_string(servBuff, NameConcretePlayer);
+                    NameConcretePlayer = df.convert_char_to_string(servBuff, NameConcretePlayer);
                     std::cout << SerialNumberPlayer << " : " << servBuff.data() << " ";
                     NamePlayers.push_back(NameConcretePlayer);
                 }
             }
             answer = "Start creating game ...";
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             stream << "Game status = 0" << endl;
             stream << "Create game with ID : " << QString::fromStdString(ToWriteInFile) << endl;
@@ -389,7 +264,6 @@ std::cout << "_________________________________________________" << std::endl;
                 std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientConn);
             }
-            CurrentGameID ++;
         //--------------------------------------------------------------------------//
             fileName = "D:/Models/OTUS/server-client/game_count.txt";               // обновляем файл с количеством игр
             QFile file0(fileName);                                                  //
@@ -402,13 +276,17 @@ std::cout << "_________________________________________________" << std::endl;
             file0.close();                                                          //
         //--------------------------------------------------------------------------//
             file.close();
-            //isWork = false;                 // выходим из цикла Create Game
+            answer = std::to_string(CurrentGameID);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+            CurrentGameID ++;
         }
         else if(isCreating == answerNo)              // connecting to game
         {
             answer = "Connection to Game? ";
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << clientBuff.data();
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR)
@@ -424,13 +302,13 @@ std::cout << "_________________________________________________" << std::endl;
             else
                 std::cout << servBuff.data();
             std::string isConection;
-            isConection = convert_char_to_string(servBuff, isConection);
+            isConection = df.convert_char_to_string(servBuff, isConection);
             if(isConection == answerYes)  // при подключении к игре пользователь прошел верификацию
             {
                 // ....
                 answer = "Write game ID: ";
-                clientBuff = clearBuf(clientBuff);
-                clientBuff = convert_string_to_char(clientBuff, answer);
+                clientBuff = df.clearBuf(clientBuff);
+                clientBuff = df.convert_string_to_char(clientBuff, answer);
                 std::cout << clientBuff.data();
                 packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
                 if (packet_size == SOCKET_ERROR)
@@ -446,11 +324,11 @@ std::cout << "_________________________________________________" << std::endl;
                 else
                     std::cout << servBuff.data();
                 std::string isGameID;
-                isGameID = convert_char_to_string(servBuff, isGameID);
+                isGameID = df.convert_char_to_string(servBuff, isGameID);
                 int gameID = stoi(isGameID);
                 bool isPlayerConection = false;
                 //--------------------------------------------------------------------------//
-                std::list<std::list<std::string>> list_game_config = readGameConfig();      // чтение файлов с конфигарацией игр
+                std::list<std::list<std::string>> list_game_config = df.readGameConfig();   // чтение файлов с конфигарацией игр
                 while(!list_game_config.empty())                                            //
                 {                                                                           //
                     int read_count = 0;                                                     //
@@ -500,8 +378,8 @@ std::cout << "_________________________________________________" << std::endl;
                 if(isPlayerConection)                                                       // игрок подключен к игре (находится в списке
                 {
                     answer = "You are connection in game";
-                    clientBuff = clearBuf(clientBuff);
-                    clientBuff = convert_string_to_char(clientBuff, answer);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
                     std::cout << clientBuff.data() << std::endl;
                     packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
                     if (packet_size == SOCKET_ERROR)
@@ -509,12 +387,16 @@ std::cout << "_________________________________________________" << std::endl;
                         std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
                         closesocket(ClientConn);
                     }
+                    answer = std::to_string(CurrentGameID);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
+                    packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
                 }
                 else if(!isPlayerConection)                                                 // игрок отсутствует в списке (повторяем цикл)
                 {
                     answer = "You are not connection in game";
-                    clientBuff = clearBuf(clientBuff);
-                    clientBuff = convert_string_to_char(clientBuff, answer);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
                     std::cout << clientBuff.data() << std::endl;
                     packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
                     if (packet_size == SOCKET_ERROR)
