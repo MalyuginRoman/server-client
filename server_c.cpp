@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <stdio.h>
@@ -9,133 +9,12 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <list>
+#include "dop_function.h"
+#include "start_game.h"
 
-namespace fs = std::experimental::filesystem;
-
-std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
+int main(int ac, char **av)
 {
-    size_t l = s.length();
-    for(int i = l - 1; i > -1; i--)
-    {
-        result.emplace(result.begin(), s.at(i));
-        result.erase(result.end() - 1);
-    }
-    return result;
-}
-std::string convert_char_to_string(std::vector <char> c, std::string result)
-{
-    result = "";
-    int i = 0;
-    while(!c.empty())
-    {
-        if(c.at(i) != '\0' && c.at(i) != '\n')
-            result += c.at(i);
-        c.erase(c.begin());
-    }
-    return result;
-}
-std::vector <char> clearBuf(std::vector <char> result)
-{
-    result.erase(result.begin(), result.end());
-    const short BUFF_SIZE = 1024;
-    for(int i = BUFF_SIZE - 1; i > -1; i--)
-        result.emplace(result.begin(), '\0');
-    return result;
-}
-std::string split(std::string str, char del)
-{
-    std::string result = "";
-    std::string temp = "";
-    for(int i=0; i<(int)str.size(); i++)
-    {
-        if(str[i] != del)
-            temp += str[i];
-        else
-        {
-            result += temp + "/";
-            temp = "";
-        }
-    }
-    std::cout << std::endl;
-    return result;
-}
-std::list<std::list<std::string>> readGameConfig()
-{
-    fs::path current_path = fs::current_path();
-    fs::path file_path(current_path);
-    std::list<std::list<std::string>> list1;
-    // Рекурсивный обход директории
-    std::cout << file_path.parent_path() << std::endl;
-    char del = '/';
-    std::string directory = split(file_path.parent_path().generic_string(), del);
-    std::cout << directory << std::endl;
-    for (auto &p : fs::recursive_directory_iterator(directory))
-    {
-        std::string readFileName = directory + p.path().filename().generic_string();
-        std::fstream readFile(readFileName);
-        if (readFile.is_open())
-        {
-            std::cout << "File " << readFileName << " be opened" << std::endl;
-            std::list<std::string> list2;
-            list2.push_back(readFileName);
-            std::string str;
-            while(readFile >> str)
-            {
-                if(str == "Game" /*status = "*/)
-                {
-                    readFile >> str >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "Create" /*game with ID : "*/)
-                {
-                    readFile >> str >> str >> str >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "Number" /*players: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "first" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "second" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "third" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "fourth" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-                else if(str == "fifth" /*: "*/)
-                {
-                    readFile >> str >> str;
-                    list2.push_back(str);
-                }
-            }
-            list1.push_back(list2);
-        }
-        readFile.close();
-    }
-    return list1;
-}
-
-int main(void)
-{
+    dop_function df;
     std::cout << "_________________________________________________" << std::endl;
     std::cout << "        Start GAME Server                        " << std::endl;
     std::cout << "_________________________________________________" << std::endl;
@@ -188,23 +67,15 @@ int main(void)
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
 std::string answer;                                                         //
+
     while (true)                                                            // Цикл № 2 - отправка сообщений во время проведения игры
     {
         int max_round_count = 100;
         int current_round = 0;
-//--------------------------------------------------------------------------//
-//std::list<std::list<std::string>> list_game_config = readGameConfig();      // чтение файлов с конфигарацией игр
-//std::cout << list_game_config.size() << std::endl;                          //
-//while(!list_game_config.empty())                                            //
-//{                                                                           //
-//    while(!list_game_config.front().empty())                                //
-//    {                                                                       //
-//        std::cout << list_game_config.front().front() << std::endl;         //
-//        list_game_config.front().pop_front();                               //
-//    }                                                                       //
-//    list_game_config.pop_front();                                           //
-//}                                                                           //
-//--------------------------------------------------------------------------//
+        std::map<std::string, std::function<ICommand*()>> *m_map;
+        std::map<std::string, std::string> *m_scope;
+        start_game Game1(m_map, m_scope);
+        Game1.create_game();
         while(current_round < max_round_count)
         {
             //Starting to listen to any Clients
@@ -239,12 +110,66 @@ std::string answer;                                                         //
             //Exchange text data between Server and Client. Disconnection if a client send "xxx"
             std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);              // Creation of buffers for sending and receiving data
             short packet_size = 0;                                                      // The size of sending / receiving packet in bytes
+
+//-----------------------------------------------------------------------------------
+            servBuff = df.clearBuf(servBuff);
+            packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+            //else
+            //    std::cout << servBuff.data() << std::endl;
+            std::string UserName;
+            UserName = df.convert_char_to_string(servBuff, UserName);
+
+            servBuff = df.clearBuf(servBuff);
+            packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientConn);
+                WSACleanup();
+                return 1;
+            }
+            //else
+            //    std::cout << servBuff.data() << std::endl;
+            std::string GameID;
+            GameID = df.convert_char_to_string(servBuff, GameID);
+//-----------------------------------------------------------------------------------// открываем файл и перезаписываем все содержимоу
+            QString fileName = "D:/Models/OTUS/server-client/game_status." +         //
+                            QString::fromStdString(GameID) + ".txt";                 // обновляем файл с количеством игр
+            std::string readFileName = fileName.toStdString();                       //
+            std::fstream readFile(readFileName);                                     //
+            QFile file(fileName);                                                    //
+            if (!file.open( QIODevice::Append /*ReadWrite*/ | QIODevice::Text )) {   //
+                qDebug() << "Не удалось открыть файл»";                              //
+                return 1;                                                            //
+            }                                                                        //
+            QTextStream stream(&file);                                               //
+            std::string str;                                                         //
+            if (readFile.is_open())                                                  //
+            {                                                                        //
+                while(readFile >> str)                                               //
+                {                                                                    //
+                    //if(str == "Game" /*status = "*/)
+                    //{
+                    //    readFile >> str >> str >> str;
+                    //    str = "1";
+                    //    stream << QString::fromStdString(str);
+                    //}
+                    //else
+                    readFile >> str;                                            //
+                }                                                                    //
+            }                                                                        //
+//-----------------------------------------------------------------------------------//
             current_round++;
 std::cout << "_________________________________________________" << std::endl;
-//stream << "_________________________________________________" << endl;
+stream << "_________________________________________________" << endl;
 answer = "_________________________________________________";
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR)
             {
@@ -255,10 +180,10 @@ answer = "_________________________________________________";
                 return 1;
             }
 std::cout << "        Round = " << current_round << std::endl;
-//stream << "        Round = " << current_round << endl;
+stream << "        Round = " << current_round << endl;
 answer = "        Round = " + std::to_string(current_round);
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR)
             {
@@ -269,8 +194,8 @@ answer = "        Round = " + std::to_string(current_round);
                 return 1;
             }
             answer = "Write your action: ";
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, answer);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR)
             {
@@ -282,13 +207,13 @@ answer = "        Round = " + std::to_string(current_round);
             }
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string UserAction;
-            UserAction = convert_char_to_string(servBuff, UserAction);
-            std::cout << UserAction << std::endl;
-//            stream << QString::fromStdString(NamePlayers.at(0)) << " using " << QString::fromStdString(UserAction) << endl;
+            UserAction = df.convert_char_to_string(servBuff, UserAction);
+            std::cout << UserName << "in game with ID:" << GameID << " is " << UserAction << std::endl;
+stream << QString::fromStdString(UserName) << " using " << QString::fromStdString(UserAction) << endl;
             closesocket(ClientConn);
+            file.close();
         }
     }
-//    file.close();
     closesocket(ServSock);
     WSACleanup();
     return 0;
