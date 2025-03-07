@@ -6,41 +6,11 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-std::vector <char> convert_string_to_char(std::vector <char> result, std::string s)
-{
-    size_t l = s.length();
-    for(int i = l - 1; i > -1; i--)
-    {
-        result.emplace(result.begin(), s.at(i));
-        result.erase(result.end() - 1);
-    }
-    return result;
-}
-
-std::string convert_char_to_string(std::vector <char> c, std::string result)
-{
-    result = "";
-    int i = 0;
-    while(!c.empty())
-    {
-        if(c.at(i) != '\0' && c.at(i) != '\n')
-            result += c.at(i);
-        c.erase(c.begin());
-    }
-    return result;
-}
-
-std::vector <char> clearBuf(std::vector <char> result)
-{
-    result.erase(result.begin(), result.end());
-    const short BUFF_SIZE = 1024;
-    for(int i = BUFF_SIZE - 1; i > -1; i--)
-        result.emplace(result.begin(), '\0');
-    return result;
-}
+#include "dop_function.h"
 
 int main(void)
 {
+    dop_function df;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
@@ -130,12 +100,10 @@ std::cout << "_________________________________________________" << std::endl;
 //----------------------------------------------------------------------------------
         while (isNeedAutorized)
         {
-            std::string anser = "Your login: ";
-            clientBuff = convert_string_to_char(clientBuff, anser);
+            std::string answer = "Your login: ";
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client login: ";
-
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-
             if (packet_size == SOCKET_ERROR)
             {
                 std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
@@ -146,12 +114,12 @@ std::cout << "_________________________________________________" << std::endl;
             }
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientLogin;
-            clientLogin = convert_char_to_string(servBuff, clientLogin);
+            clientLogin = df.convert_char_to_string(servBuff, clientLogin);
             std::cout << servBuff.data();
 //----------------------------------------------------------------------------------
-            clientBuff = clearBuf(clientBuff);
-            anser = "Your password: ";
-            clientBuff = convert_string_to_char(clientBuff, anser);
+            clientBuff = df.clearBuf(clientBuff);
+            answer = "Your password: ";
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client password: ";
             if (clientBuff[0] == 'o' && clientBuff[1] == 'u' && clientBuff[2] == 't')
             {
@@ -172,7 +140,7 @@ std::cout << "_________________________________________________" << std::endl;
             }
             packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientPassword;
-            clientPassword = convert_char_to_string(servBuff, clientPassword);
+            clientPassword = df.convert_char_to_string(servBuff, clientPassword);
             std::cout << servBuff.data();
 //----------------------------------------------------------------------------------
             std::string username1 = "PetrPetrov";
@@ -185,17 +153,17 @@ std::cout << "_________________________________________________" << std::endl;
             if(((clientLogin == username1) || (clientLogin == username2) || (clientLogin == username3) || (clientLogin == username4) || (clientLogin == username5) || (clientLogin == username6))
                     && (clientPassword == usersecrt))
             {
-                anser = "Your autorized!";
+                answer = "Your autorized!";
                 isNeedAutorized = false;
                 std::cout << "Client autorized!" << std::endl;
             }
             else
             {
-                anser = "Your are not autorized!";
+                answer = "Your are not autorized!";
                 std::cout << "Client is not autorized!" << std::endl;
             }
-            clientBuff = clearBuf(clientBuff);
-            clientBuff = convert_string_to_char(clientBuff, anser);
+            clientBuff = df.clearBuf(clientBuff);
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
             if (clientBuff[0] == 'o' && clientBuff[1] == 'u' && clientBuff[2] == 't')
             {
                 shutdown(ClientConn, SD_BOTH);
@@ -213,8 +181,8 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 1;
             }
-            clientBuff = clearBuf(clientBuff);
-            servBuff = clearBuf(servBuff);
+            clientBuff = df.clearBuf(clientBuff);
+            servBuff = df.clearBuf(servBuff);
 //----------------------------------------------------------------------------------
         }
         closesocket(ClientConn);
