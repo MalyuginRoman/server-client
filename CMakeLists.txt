@@ -10,6 +10,7 @@ target_include_directories(server_a_test PRIVATE include)
 target_compile_definitions(
   server_a_test PRIVATE
   $<$<BOOL:${test}>:test1>
+  $<$<BOOL:${test}>:test2>
 )
 
 enable_testing()
