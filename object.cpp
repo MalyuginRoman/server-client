@@ -68,12 +68,14 @@ bool object::getPosition(object *obj, int dt)
             double valueA = place.angular;
             double valueX = valueV * cos(valueA * TR) * dt;
             double valueY = valueV * sin(valueA * TR) * dt;
-            place.placeX += valueX;
-            if(place.placeX > Xmax)
-                place.placeX = Xmax;
-            place.placeY += valueY;
-            if(place.placeY > Ymax)
-                place.placeY = Ymax;
+            if(cos(valueA) > 0)
+                place.placeX += valueX;
+            else if(cos(valueA) < 0)
+                place.placeX -= valueX;
+            if(sin(valueA) > 0)
+                place.placeY += valueY;
+            else if(sin(valueA) < 0)
+                place.placeY -= valueY;
             obj->setPlace(place);
             return true;
         }
@@ -99,7 +101,7 @@ bool object::getVelocity(object *obj, double du)
     try
     {
         react state = obj->state();
-        state.velocity = obj->state().velocity + du;
+        state.velocity = du;
         obj->setState(state);
         return true;
     } catch(...) {
@@ -117,9 +119,8 @@ bool object::getAngular(object *obj, int dt)
     try
     {
         coord place = obj->place();
-        double valueA = place.angular;
         react state = obj->state();
-        place.angular = valueA + state.angularVelocity * dt;
+        place.angular = state.angularVelocity * dt;
         obj->setPlace(place);
         return true;
     } catch(...) {
@@ -187,6 +188,22 @@ public:
         vector.push_back(spaceship);
         return spaceship;
     }
+    void del(int i)
+    {
+        int cur_num = 0;
+        for(std::vector<object*>::iterator it = vector.begin();
+                                           it!= vector.end();)
+        {
+            if(cur_num == i)
+            {
+                vector.erase(it);
+                break;
+            }
+            else
+                ++it;
+            cur_num++;
+        }
+    }
     object *at(int i)
     {
         return vector.at(i);
@@ -207,6 +224,10 @@ object *objectVector::add(int playerID, int objectID, react state, coord place)
 {
     return imp->add(playerID, objectID, state, place);
 }
+void objectVector::del(int i)
+{
+    return imp->del(i);
+}
 bool objectVector::isEmpty() const
 {
     return imp->vector.empty();
@@ -215,7 +236,7 @@ size_t objectVector::count() const
 {
     return imp->vector.size();
 }
-const std::vector<object *> &objectVector::vector() const
+const std::vector<object *> objectVector::vector() const
 {
     return imp->vector;
 }
