@@ -16,10 +16,15 @@ int main(void)
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
+std::cout << "001 _________________________________________________" << std::endl;
     const char IP_SERV[] = "10.124.40.14";
+std::cout << "002 _________________________________________________" << std::endl;
     const int PORT_NUM = 650;
+std::cout << "003 _________________________________________________" << std::endl;
     const short BUFF_SIZE = 1024;
+std::cout << "004 _________________________________________________" << std::endl;
     int erStat;
+std::cout << "005 _________________________________________________" << std::endl;
     in_addr ip_to_num;
 std::cout << "00 _________________________________________________" << std::endl;
     erStat = inet_pton(AF_INET, IP_SERV, &ip_to_num);
