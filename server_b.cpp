@@ -375,7 +375,7 @@ std::cout << "_________________________________________________" << std::endl;
                     list_game_config.pop_front();                                           //
                 }                                                                           //
                 //--------------------------------------------------------------------------//
-                if(isPlayerConection)                                                       // игрок подключен к игре (находится в списке
+                if(isPlayerConection)                                                       // игрок подключен к игре (находится в списке)
                 {
                     answer = "You are connection in game";
                     clientBuff = df.clearBuf(clientBuff);
