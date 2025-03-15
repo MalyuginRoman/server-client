@@ -11,6 +11,7 @@
 #include "dop_function.h"
 int main(void)
 {
+    #ifdef test1
     dop_function df;
     bool isNeedAutorized = true;
     int num_access = 0;
@@ -111,5 +112,6 @@ std::cout << "_________________________________________________" << std::endl;
         //isNeedAutorized = true;
     }
     close(ServSock);
+    #endif
     return 0;
 }
