@@ -13,6 +13,7 @@ int main(void)
 {
     dop_function df;
     bool isNeedAutorized = true;
+    int num_access = 0;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
@@ -52,6 +53,7 @@ std::cout << "_________________________________________________" << std::endl;
             }
             //packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientLogin = "PetrPetrov";
+            servBuff = df.clearBuf(servBuff);
             clientLogin = df.convert_char_to_string(servBuff, clientLogin);
             std::cout << servBuff.data();
             clientBuff = df.clearBuf(clientBuff);
@@ -67,6 +69,7 @@ std::cout << "_________________________________________________" << std::endl;
             }
             //packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientPassword = "123";
+            servBuff = df.clearBuf(servBuff);
             clientPassword = df.convert_char_to_string(servBuff, clientPassword);
             std::cout << servBuff.data();
             std::string username1 = "PetrPetrov";
@@ -89,6 +92,8 @@ std::cout << "_________________________________________________" << std::endl;
             {
                 answer = "Your are not autorized!";
                 std::cout << "Client is not autorized!" << std::endl;
+                num_access ++;
+                if(num_access > 10) isNeedAutorized = false;
             }
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, answer);
@@ -103,7 +108,7 @@ std::cout << "_________________________________________________" << std::endl;
             servBuff = df.clearBuf(servBuff);
         }
         close(ClientConn);
-        isNeedAutorized = true;
+        //isNeedAutorized = true;
     }
     close(ServSock);
     return 0;
