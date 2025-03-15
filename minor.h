@@ -1,6 +1,7 @@
 #ifndef MINOR_H
 #define MINOR_H
 #include <vector>
+#include <list>
 
 const int dt = 1;
 const int dF = 1;
@@ -9,7 +10,8 @@ const double Xmax = 100.;
 const double Ymax = 100.;
 const int count_system_1 = 4;
 const int count_system_2 = 5;
-const double Umax = 4;
+const double Umax = 15.;
+const double Udelta = 5.;
 
 /*!
   Координаты и ориентация объекта
@@ -70,6 +72,36 @@ struct objectCheck
 {
 public:
     system_okr p_map;
+};
+
+struct collisionObjects
+{
+public:
+    bool isActive;
+    int obj1;
+    int obj2;
+};
+
+struct game_confige
+{
+public:
+    int game_status;
+    int number_player;
+    std::list<std::string> player_name;
+};
+
+struct game
+{
+    int gameID;
+    int game_status;
+    int connection_player;
+    std::vector<std::string> player_name;
+};
+
+struct go_game
+{
+    int game_status;
+    std::vector<std::string> player_name;
 };
 
 #endif // MINOR_H
