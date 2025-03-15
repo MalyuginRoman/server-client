@@ -74,7 +74,9 @@ std::cout << "_________________________________________________" << std::endl;
             std::string username5 = "RealMadrid";
             std::string username6 = "ETyumencev";
             std::string usersecrt = "123";
-            if(((clientLogin == username1) || (clientLogin == username2) || (clientLogin == username3) || (clientLogin == username4) || (clientLogin == username5) || (clientLogin == username6))
+            if(((clientLogin == username1) || (clientLogin == username2) ||
+                (clientLogin == username3) || (clientLogin == username4) ||
+                (clientLogin == username5) || (clientLogin == username6))
                     && (clientPassword == usersecrt))
             {
                 answer = "Your autorized!";
