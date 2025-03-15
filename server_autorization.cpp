@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <cstring>
 #include <vector>
+#include "dop_function.h"
 int main(void)
 {
     dop_function df;
