@@ -2,6 +2,7 @@
 #define ORDER_H
 #include <string>
 #include <vector>
+#include <list>
 
 class order
 {
@@ -32,8 +33,8 @@ public:
     order* add(int playerID, int objectID, std::string actionName, std::string specParam);
     bool isEmpty() const;
     size_t count() const;
-    const std::vector<order *>& vector() const;
-    order* at(int i);
+    const std::list/*vector*/<order *> vector() const;
+    //order* at(int i);
 private:
     class orderVectorP* imp;
 };
