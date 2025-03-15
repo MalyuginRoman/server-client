@@ -28,10 +28,13 @@ std::cout << "_________________________________________________" << std::endl;
     servInfo.sin_family = AF_INET;
     servInfo.sin_addr = ip_to_num;
     servInfo.sin_port = htons(PORT_NUM);
+std::cout << "1 _________________________________________________" << std::endl;
     bind(ServSock, (struct sockaddr*)&servInfo, sizeof(servInfo)); 
+std::cout << "2 _________________________________________________" << std::endl;
     while(isNeedAutorized)
     {
         listen(ServSock , SOMAXCONN);
+std::cout << "3 _________________________________________________" << std::endl;
         struct sockaddr_in clientInfo;
         memset(&clientInfo, '0', sizeof(clientInfo));
         socklen_t clientInfo_size = sizeof(clientInfo);
@@ -40,6 +43,7 @@ std::cout << "_________________________________________________" << std::endl;
         short packet_size = 0;
         while (isNeedAutorized)
         {
+std::cout << "4 _________________________________________________" << std::endl;
             std::string answer = "Your login: ";
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client login: ";
