@@ -1,6 +1,7 @@
 #include <iostream>
 #include "icommand.h"
 #include "object.h"
+#include "objposition.h"
 
 bool isXY(std::map<int, system_okr> *p_map, object* obj, int j)
 {
@@ -17,7 +18,7 @@ bool isnXY(std::map<int, system_okr> *p_map, object* obj, int j)
                ((obj->place().placeX - p_map->at(j).XY.Xmax) < eps);
     bool isY = ((p_map->at(j).XY.Ymin - obj->place().placeY) < eps) &&
                ((obj->place().placeY - p_map->at(j).XY.Ymax) < eps);
-    return (!isX && !isY);
+    return (!isX || !isY);
 }
 
 class MoveCommandP
@@ -46,12 +47,9 @@ MoveCommand::~MoveCommand() { delete imp;}
 void MoveCommand::execute()
 {
     CheckPositionCommand* cmd_search = nullptr;
-    std::cout << "CommandMove" << std::endl;
     if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
         throw std::runtime_error ("Object not found");
-    if(!imp->obj->getVelocity(imp->obj, 0.))
-        throw std::runtime_error ("Unknown velocity");
-    std::cout << "Start position  [" << imp->obj->place().placeX << ", " << imp->obj->place().placeY << "]" << std::endl;
+    std::cout << "Start position object with ID" << imp->obj->objectID() << " : [" << imp->obj->place().placeX << ", " << imp->obj->place().placeY << "]" << std::endl;
     if(!imp->obj->getPosition(imp->obj, dt))
         throw std::runtime_error ("Unknown position");
     else
@@ -59,7 +57,7 @@ void MoveCommand::execute()
         cmd_search->execute(imp->p_map_a, imp->obj);
         cmd_search->execute(imp->p_map_b, imp->obj);
     }
-    std::cout << "Finish position [" << imp->obj->place().placeX << ", " << imp->obj->place().placeY << "]" << std::endl;
+    std::cout << "Finish position object with ID" << imp->obj->objectID() << " : [" << imp->obj->place().placeX << ", " << imp->obj->place().placeY << "]" << std::endl;
 }
 
 int MoveCommand::get_Id_cmd()
@@ -89,9 +87,6 @@ std::map<int, system_okr>* MoveCommand::p_map_b() const
 
 void CheckPositionCommand::execute(std::map<int, system_okr>* p_map, object* obj)
 {
-    std::cout << "I am in CheckPositionCommand!" << std::endl;
-    std::cout << "Finish position [" << obj->place().placeX << ", " << obj->place().placeY << "]" << std::endl;
-
     bool change_place = false;
     size_t count_map_chize = p_map->size();
     for(int i = 0; i < count_map_chize; i++)
@@ -100,12 +95,21 @@ void CheckPositionCommand::execute(std::map<int, system_okr>* p_map, object* obj
         {
             if(isnXY(p_map, obj, i))
             {
-                p_map->at(i).countObject--;
-                if(p_map->at(i).countObject == 0)
-                    p_map->at(i).isEmpty = true;
-std::cout << "object id:" << p_map->at(i).obj_id.front() << " delete from " << p_map->at(i).id_syst_okr << " in p_map:size " << p_map->size() << std::endl;
-                p_map->at(i).obj_id.pop_back();
-                change_place = true;
+                for(std::vector<int>::iterator it = p_map->at(i).obj_id.begin();
+                                               it != p_map->at(i).obj_id.end();)
+                {
+                    if(*it == obj->objectID())
+                    {
+                        p_map->at(i).countObject--;
+                        if(p_map->at(i).countObject == 0)
+                            p_map->at(i).isEmpty = true;
+std::cout << "object id:" << *it << " delete from " << p_map->at(i).id_syst_okr << " in p_map:size " << p_map->size() << std::endl;
+                        it = p_map->at(i).obj_id.erase(it);
+                        change_place = true;
+                    }
+                    else
+                        ++it;
+                }
             }
         }
         if(change_place)
@@ -148,7 +152,6 @@ RotateCommand::~RotateCommand() { delete imp;}
 
 void RotateCommand::execute()
 {
-    std::cout << "CommandRotate" << std::endl;
     if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
         throw std::runtime_error ("Object not found");
     if(!imp->obj->getAngular(imp->obj, 0))
@@ -194,10 +197,9 @@ StartMotion::~StartMotion() { delete imp;}
 
 void StartMotion::execute()
 {
-    std::cout << "StartMotion" << std::endl;
     if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
         throw std::runtime_error ("Object not found");
-    imp->obj->getVelocity(imp->obj, 0.);
+    imp->obj->getVelocity(imp->obj, imp->du);
     std::cout << "Object with id [" << imp->obj->objectID() << "] is start motion" << std::endl;
 }
 
@@ -235,7 +237,6 @@ StopMotion::~StopMotion() { delete imp;}
 
 void StopMotion::execute()
 {
-    std::cout << "StopMotion" << std::endl;
     if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
         throw std::runtime_error ("Object not found");
     std::cout << "Object with id [" << imp->obj->objectID() << "] have velocity before StopMotion = "
@@ -265,36 +266,60 @@ class ShootCommandP
 public:
     objectVector* vect;
     object* obj;
+    std::map<int, system_okr>* p_map_a;
+    std::map<int, system_okr>* p_map_b;
+    double speed;
+    double angle;
 
-    ShootCommandP(objectVector* vect, object* obj) :
-        vect(vect), obj(obj)
+    ShootCommandP(std::map<int, system_okr>* p_map_a,
+                  std::map<int, system_okr>* p_map_b,
+                  objectVector* vect, object* obj,
+                  double speed, double angle) :
+        p_map_a(p_map_a), p_map_b(p_map_b), vect(vect), obj(obj), speed(speed), angle(angle)
     {
     }
 };
 
-ShootCommand::ShootCommand(objectVector* vect, object* obj) :
-    imp(new ShootCommandP(vect, obj))
+ShootCommand::ShootCommand(std::map<int, system_okr>* p_map_a,
+                           std::map<int, system_okr>* p_map_b,
+                           objectVector* vect, object* obj,
+                           double speed, double angle) :
+    imp(new ShootCommandP(p_map_a, p_map_b, vect, obj, speed, angle))
 {}
 
 ShootCommand::~ShootCommand() { delete imp;}
 
 void ShootCommand::execute()
 {
-    std::cout << "ShootCommand" << std::endl;
-// create new object (torpeda)
     int playerID = imp->obj->playerID();
-    int objectId = playerID * 100 + 1;
+
+    std::list<int> pl_obj;
+    int i1 = imp->vect->count();
+    for(int i2 = 0; i2 < i1; i2++)
+    {
+        if(imp->vect->at(i2)->playerID() == playerID)
+            pl_obj.push_back(imp->vect->at(i2)->objectID());
+    }
+    int objectId = pl_obj.back();
+    if(objectId < 100)
+        objectId = playerID * 100 + 1;
+    else
+        objectId++;
+
     int i = imp->vect->count();
     coord place;
     react state;
 
     place.placeX = imp->obj->place().placeX;
     place.placeY = imp->obj->place().placeY;
-    place.angular = imp->obj->place().angular;
+    place.angular = imp->angle;
 
-    state.velocity = Umax;
+    if(imp->speed > 0.)
+        state.velocity = imp->speed + Udelta;
+    else if(imp->speed < 0.)
+        state.velocity = imp->speed - Udelta;
     state.angularVelocity = 0;
-    state.fuel = -9999;
+    state.fuel = 9999;
 
     imp->vect->add(playerID, objectId, state, place);
 std::cout << "Create new object (shoot) "   << imp->vect->at(i)->objectID()
@@ -304,6 +329,16 @@ std::cout << "Create new object (shoot) "   << imp->vect->at(i)->objectID()
           << ", x = "                       << imp->vect->at(i)->place().placeX
           << ", y = "                       << imp->vect->at(i)->place().placeY
           << ", a = "                       << imp->vect->at(i)->place().angular << std::endl;
+    //-------------------------------------------------------------
+    // помещаем ракеты в системы окресностей
+    //-------------------------------------------------------------
+    object_position op;
+    imp->p_map_a = op.func_obj_r(imp->p_map_a, imp->vect->at(i));
+    imp->p_map_b = op.func_obj_r(imp->p_map_b, imp->vect->at(i));
+    MoveCommand* cmd_roket = new MoveCommand(imp->p_map_a, imp->p_map_b, imp->vect->at(i));
+    cmd_roket->execute();
+    BurnCommand* cmd_burn = new BurnCommand(imp->vect->at(i));
+    cmd_burn->execute();
 }
 
 int ShootCommand::get_Id_cmd()
@@ -326,6 +361,16 @@ objectVector* ShootCommand::vect() const
     return imp->vect;
 }
 
+std::map<int, system_okr>* ShootCommand::p_map_a() const
+{
+    return imp->p_map_a;
+}
+
+std::map<int, system_okr>* ShootCommand::p_map_b() const
+{
+    return imp->p_map_b;
+}
+
 class InternetCommandP
 {
 public:
@@ -333,9 +378,15 @@ public:
     object* obj;
     order *order_cmd;
     std::list<ICommand*> *cmds;
+    std::map<int, system_okr>* p_map_a;
+    std::map<int, system_okr>* p_map_b;
 
-    InternetCommandP(objectVector* vect, object* obj, order *order_cmd,
+    InternetCommandP(std::map<int, system_okr>* p_map_a,
+                     std::map<int, system_okr>* p_map_b,
+                     objectVector* vect, object* obj, order *order_cmd,
                      std::list<ICommand*> *cmds) :
+        p_map_a(p_map_a),
+        p_map_b(p_map_b),
         vect(vect),
         obj(obj),
         order_cmd(order_cmd),
@@ -344,8 +395,11 @@ public:
     }
 };
 
-InternetCommand::InternetCommand(objectVector* vect, object* obj, order *order_cmd, std::list<ICommand *> *cmds) :
-    imp(new InternetCommandP(vect, obj, order_cmd, cmds))
+InternetCommand::InternetCommand(std::map<int, system_okr>* p_map_a,
+                                 std::map<int, system_okr>* p_map_b,
+                                 objectVector* vect, object* obj,
+                                 order *order_cmd, std::list<ICommand *> *cmds) :
+    imp(new InternetCommandP(p_map_a, p_map_b, vect, obj, order_cmd, cmds))
 {
     create();
     for(int i = 0; i < imp->cmds->size(); i++)
@@ -376,7 +430,7 @@ bool InternetCommand::create()
         }
         else if(imp->order_cmd->actionName() == "Shoot")
         {
-            ShootCommand *cmd_shoot = new ShootCommand(imp->vect, imp->obj);
+            ShootCommand *cmd_shoot = new ShootCommand(imp->p_map_a, imp->p_map_b, imp->vect, imp->obj, Umax, 0.);
             imp->cmds->push_back(cmd_shoot);
         }
         return true;
@@ -390,7 +444,6 @@ bool InternetCommand::create()
 
 void InternetCommand::execute()
 {
-    std::cout << "InternetCommand" << std::endl;
     if(imp->cmds->empty())
         throw std::runtime_error ("Сommand list is empty");
     for(int i = 0; i < imp->cmds->size(); i++)
@@ -408,4 +461,91 @@ void InternetCommand::execute()
 int InternetCommand::get_Id_parent()
 {
     return imp->obj->playerID();
+}
+
+std::map<int, system_okr>* InternetCommand::p_map_a() const
+{
+    return imp->p_map_a;
+}
+
+std::map<int, system_okr>* InternetCommand::p_map_b() const
+{
+    return imp->p_map_b;
+}
+
+class BurnCommandP
+{
+public:
+    object* obj;
+
+    BurnCommandP(object* obj) :
+        obj(obj)
+    {
+    }
+};
+
+BurnCommand::BurnCommand(object* obj) :
+    imp(new BurnCommandP(obj))
+{}
+
+BurnCommand::~BurnCommand() { delete imp;}
+
+void BurnCommand::execute()
+{
+    if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
+        throw std::runtime_error ("Object not found");
+    imp->obj->getFuel(imp->obj, 1);
+}
+
+int BurnCommand::get_Id_cmd()
+{
+    return CommandBurn;
+}
+
+int BurnCommand::get_Id_parent()
+{
+    return imp->obj->playerID();
+}
+
+object* BurnCommand::obj() const
+{
+    return imp->obj;
+}
+
+class CheckCommandP
+{
+public:
+    object* obj;
+
+    CheckCommandP(object* obj) :
+        obj(obj)
+    {
+    }
+};
+
+CheckCommand::CheckCommand(object* obj) :
+    imp(new CheckCommandP(obj))
+{}
+
+CheckCommand::~CheckCommand() { delete imp;}
+
+void CheckCommand::execute()
+{
+    if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
+        throw std::runtime_error ("Object not found");
+}
+
+int CheckCommand::get_Id_cmd()
+{
+    return CommandCheck;
+}
+
+int CheckCommand::get_Id_parent()
+{
+    return imp->obj->playerID();
+}
+
+object* CheckCommand::obj() const
+{
+    return imp->obj;
 }
