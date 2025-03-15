@@ -16,46 +16,30 @@ int main(void)
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
-std::cout << "001 _________________________________________________" << std::endl;
     const char IP_SERV[] = "10.124.40.14";
-std::cout << "002 _________________________________________________" << std::endl;
     const int PORT_NUM = 650;
-std::cout << "003 _________________________________________________" << std::endl;
     const short BUFF_SIZE = 1024;
-std::cout << "004 _________________________________________________" << std::endl;
     int erStat;
-std::cout << "005 _________________________________________________" << std::endl;
     in_addr ip_to_num;
-std::cout << "00 _________________________________________________" << std::endl;
     erStat = inet_pton(AF_INET, IP_SERV, &ip_to_num);
-std::cout << "01 _________________________________________________" << std::endl;
     int ServSock = socket(AF_INET, SOCK_STREAM, 0);
-std::cout << "02 _________________________________________________" << std::endl;
     struct sockaddr_in servInfo;
-std::cout << "03 _________________________________________________" << std::endl;
     memset(&servInfo, '0', sizeof(servInfo));
-std::cout << "04 _________________________________________________" << std::endl;
     servInfo.sin_family = AF_INET;
-std::cout << "05 _________________________________________________" << std::endl;
     servInfo.sin_addr = ip_to_num;
-std::cout << "06 _________________________________________________" << std::endl;
     servInfo.sin_port = htons(PORT_NUM);
-std::cout << "1 _________________________________________________" << std::endl;
     bind(ServSock, (struct sockaddr*)&servInfo, sizeof(servInfo)); 
-std::cout << "2 _________________________________________________" << std::endl;
     while(isNeedAutorized)
     {
         listen(ServSock , SOMAXCONN);
-std::cout << "3 _________________________________________________" << std::endl;
         struct sockaddr_in clientInfo;
         memset(&clientInfo, '0', sizeof(clientInfo));
         socklen_t clientInfo_size = sizeof(clientInfo);
-        int ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
+        //int ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
         std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
         short packet_size = 0;
         while (isNeedAutorized)
         {
-std::cout << "4 _________________________________________________" << std::endl;
             std::string answer = "Your login: ";
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client login: ";
