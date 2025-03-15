@@ -12,6 +12,7 @@
 int main(void)
 {
     dop_function df;
+    bool isNeedAutorized = true;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start AUTORIZED SERVER                   " << std::endl;
 std::cout << "_________________________________________________" << std::endl;
@@ -104,6 +105,6 @@ std::cout << "_________________________________________________" << std::endl;
         close(ClientConn);
         isNeedAutorized = true;
     }
-    closesocket(ServSock);
+    close(ServSock);
     return 0;
 }
