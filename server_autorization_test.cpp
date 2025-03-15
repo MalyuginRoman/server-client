@@ -80,7 +80,6 @@ std::cout << "_________________________________________________" << std::endl;
                 answer = "Your autorized!";
                 isNeedAutorized = false;
                 std::cout << "Client autorized!" << std::endl;
-                num_access ++;
                 if(num_access < 5) isNeedAutorized = true;
             }
             else
@@ -88,6 +87,8 @@ std::cout << "_________________________________________________" << std::endl;
                 answer = "Your are not autorized!";
                 std::cout << "Client is not autorized!" << std::endl;
             }
+            num_access ++;
+            if(num_access == 5) isNeedAutorized = false;
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
