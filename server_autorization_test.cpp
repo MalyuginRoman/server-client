@@ -46,14 +46,11 @@ std::cout << "_________________________________________________" << std::endl;
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client login: ";
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-            if (packet_size == SO_ERROR)
-            {
-                close(ServSock);
-                close(ClientConn);
-                return 1;
-            }
             //packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
-            std::string clientLogin = "PetrPetrov";
+            if(num_access == 0) std::string clientLogin = "PetrPetrov";
+            if(num_access == 0) std::string clientLogin = "JohnSmith";
+            if(num_access == 0) std::string clientLogin = "RealMadrid";
+            if(num_access == 0) std::string clientLogin = "PetrPetro1";
             servBuff = df.clearBuf(servBuff);
             //clientLogin = df.convert_string_to_char(servBuff, clientLogin);
             std::cout << clientLogin /*servBuff.data()*/ << std::endl;;
@@ -62,12 +59,6 @@ std::cout << "_________________________________________________" << std::endl;
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             std::cout << "Client password: ";
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-            if (packet_size == SO_ERROR)
-            {
-                close(ServSock);
-                close(ClientConn);
-                return 1;
-            }
             //packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
             std::string clientPassword = "123";
             servBuff = df.clearBuf(servBuff);
@@ -88,23 +79,17 @@ std::cout << "_________________________________________________" << std::endl;
                 answer = "Your autorized!";
                 isNeedAutorized = false;
                 std::cout << "Client autorized!" << std::endl;
+                num_access ++;
+                if(num_access < 5) isNeedAutorized = true;
             }
             else
             {
                 answer = "Your are not autorized!";
                 std::cout << "Client is not autorized!" << std::endl;
-                num_access ++;
-                if(num_access > 10) isNeedAutorized = false;
             }
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, answer);
             packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
-            if (packet_size == SO_ERROR)
-            {
-                close(ServSock);
-                close(ClientConn);
-                return 1;
-            }
             clientBuff = df.clearBuf(clientBuff);
             servBuff = df.clearBuf(servBuff);
         }
