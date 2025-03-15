@@ -83,35 +83,33 @@ private:
 class CheckCommand : public ICommand
 {
 public:
-    int get_Id_cmd()
-    {
-        return CommandCheck;
-    }
-    int get_Id_parent()
-    {
-        return -9999;
-    }
-    void execute()
-    {
-        std::cout << "CheckCommand" << std::endl;
-    }
+    CheckCommand(object* obj);
+    ~CheckCommand();
+
+    object* obj() const;
+
+    int get_Id_cmd();
+    int get_Id_parent();
+    void execute();
+
+private:
+    class CheckCommandP* imp;
 };
 
 class BurnCommand : public ICommand
 {
 public:
-    int get_Id_cmd()
-    {
-        return CommandBurn;
-    }
-    int get_Id_parent()
-    {
-        return -9999;
-    }
-    void execute()
-    {
-        std::cout << "BurnCommand" << std::endl;
-    }
+    BurnCommand(object* obj);
+    ~BurnCommand();
+
+    object* obj() const;
+
+    int get_Id_cmd();
+    int get_Id_parent();
+    void execute();
+
+private:
+    class BurnCommandP* imp;
 };
 
 class LogerCommand : public ICommand
@@ -185,7 +183,9 @@ public:
 class InternetCommand : public ICommand
 {
 public:
-    InternetCommand(objectVector* vect, object* obj, order *order_cmd,
+    InternetCommand(std::map<int, system_okr>* p_map_a,
+                    std::map<int, system_okr>* p_map_b,
+                    objectVector* vect, object* obj, order *order_cmd,
                     std::list<ICommand*> *cmds);
     ~InternetCommand();
 
@@ -193,6 +193,8 @@ public:
     object* obj;
     order *order_cmd;
     std::list<ICommand*> cmds;
+    std::map<int, system_okr>* p_map_a() const;
+    std::map<int, system_okr>* p_map_b() const;
 
     int get_Id_cmd()
     {
@@ -293,11 +295,18 @@ private:
 class ShootCommand : public ICommand
 {
 public:
-    ShootCommand(objectVector* vect, object* obj);
+    ShootCommand(std::map<int, system_okr>* p_map_a,
+                 std::map<int, system_okr>* p_map_b,
+                 objectVector* vect, object* obj,
+                 double speed, double angle);
     ~ShootCommand();
 
     objectVector* vect() const;
     object* obj() const;
+    std::map<int, system_okr>* p_map_a() const;
+    std::map<int, system_okr>* p_map_b() const;
+    double speed() const;
+    double angle() const;
 
     int get_Id_cmd();
     int get_Id_parent();
