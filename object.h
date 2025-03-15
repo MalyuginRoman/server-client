@@ -42,9 +42,10 @@ public:
     void reset();
 
     object* add(int playerID, int objectID, react state, coord place);
+    void del(int i);
     bool isEmpty() const;
     size_t count() const;
-    const std::vector<object *>& vector() const;
+    const std::vector<object *> vector() const;
     object* at(int i);
 private:
     class objectVectorP* imp;
