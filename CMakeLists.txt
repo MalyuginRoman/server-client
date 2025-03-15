@@ -5,12 +5,12 @@ option(test "test test1 function" ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0")
 
-add_executable(server_autorization_test server_autorization_test.cpp)
-target_include_directories(server_autorization_test PRIVATE include)
+add_executable(server_a_test server_autorization_test.cpp)
+target_include_directories(server_a_test PRIVATE include)
 target_compile_definitions(
-  server_autorization_test PRIVATE
+  server_a_test PRIVATE
   $<$<BOOL:${test}>:test1>
 )
 
 enable_testing()
-add_test(NAME server_autorization_test COMMAND $<TARGET_FILE:server_autorization_test>)
+add_test(NAME server_a_test COMMAND $<TARGET_FILE:server_a_test>)
