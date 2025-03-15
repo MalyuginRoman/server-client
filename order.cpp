@@ -62,25 +62,21 @@ void order::setActionName(std::string value)
 class orderVectorP
 {
 public:
-    std::vector<order*> vector;
+    std::list/*vector*/<order*> obj;
 
     ~orderVectorP()
     {
-       vector.clear();
+       obj.clear();
     }
     void reset()
     {
-        vector.clear();
+        obj.clear();
     }
     order *add(int playerID, int objectID, std::string actionName, std::string specParam)
     {
         order* playerOrder = new order(playerID, objectID, actionName, specParam);
-        vector.push_back(playerOrder);
+        obj.push_back(playerOrder);
         return playerOrder;
-    }
-    order *at(int i)
-    {
-        return vector.at(i);
     }
 };
 orderVector::orderVector() : imp(new orderVectorP)
@@ -100,18 +96,18 @@ order *orderVector::add(int playerID, int objectID, std::string actionName, std:
 }
 bool orderVector::isEmpty() const
 {
-    return imp->vector.empty();
+    return imp->obj.empty();
 }
 size_t orderVector::count() const
 {
-    return imp->vector.size();
+    return imp->obj.size();
 }
-const std::vector<order *> &orderVector::vector() const
+const std::list/*vector*/<order *> orderVector::vector() const
 {
-    return imp->vector;
+    return imp->obj;
 }
 
-order *orderVector::at(int i)
-{
-    return imp->at(i);
-}
+//order *orderVector::at(int i)
+//{
+//    return imp->at(i);
+//}
