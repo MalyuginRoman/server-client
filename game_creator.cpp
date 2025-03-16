@@ -1,9 +1,10 @@
 #include "game_creator.h"
 
-bool game_creator::game_create(std::vector<game> *games)
+int game_creator::game_create(std::vector<game> *games)
 {
     dop_function df;
     size_t game_count = games->size();
+    int gameID;
     bool isAllPlayer = false;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start GAME Creator                       " << std::endl;
@@ -23,7 +24,7 @@ std::cout << "_________________________________________________" << std::endl;
     if ( erStat != 0 ) {
         std::cout << "Error WinSock version initializaion #";
         std::cout << WSAGetLastError();
-        return 1;
+        return 999;
     }
     else
         std::cout << "WinSock initialization is OK" << std::endl;
@@ -32,7 +33,7 @@ std::cout << "_________________________________________________" << std::endl;
         std::cout << "Error initialization socket # " << WSAGetLastError() << std::endl;
         closesocket(ServSock);
         WSACleanup();
-        return 1;
+        return 999;
     }
     else
         std::cout << "Server socket initialization is OK" << std::endl;
@@ -46,7 +47,7 @@ std::cout << "_________________________________________________" << std::endl;
         std::cout << "Error Socket binding to server info. Error # " << WSAGetLastError() << std::endl;
         closesocket(ServSock);
         WSACleanup();
-        return 1;
+        return 999;
     }
     else
         std::cout << "Binding socket to Server info is OK" << std::endl;
@@ -55,6 +56,7 @@ std::cout << "_________________________________________________" << std::endl;
 //--------------------------------------------------------------------------------//
     bool isPlayerConection = false;
     game current_game;
+    current_game.gameID = 999;
     while (!isAllPlayer)                                                          // Цикл № 1 - для создания игра / определения наличия и формата доступа клиентов к игре
     {
         erStat = listen(ServSock, SOMAXCONN);
@@ -63,7 +65,7 @@ std::cout << "_________________________________________________" << std::endl;
             std::cout << "Can't start to listen to. Error # " << WSAGetLastError() << std::endl;
             closesocket(ServSock);
             WSACleanup();
-            return 1;
+            return 999;
         }
         else {
             std::cout << "Listening..." << std::endl;
@@ -245,7 +247,7 @@ std::cout << "_________________________________________________" << std::endl;
                     std::cout << servBuff.data();
                 std::string isGameID;
                 isGameID = df.convert_char_to_string(servBuff, isGameID);
-                int gameID = stoi(isGameID);
+                gameID = stoi(isGameID);
                 if(gameID < game_count)
                 {
                     if(current_game.gameID != gameID)
@@ -255,10 +257,20 @@ std::cout << "_________________________________________________" << std::endl;
                         if(playerName == current_game.player_name.at(c))
                             isPlayerConection = true;
                     }
+                    if(current_game.game_status == 1)
+                    {
+                        std::cout << "Game is going now!!!" << std::endl;
+                        isPlayerConection = false;
+                    }
+                    else if(current_game.game_status == 2)
+                    {
+                        std::cout << "Game is ending!!!" << std::endl;
+                        isPlayerConection = false;
+                    }
                 }
-                else
+                else if(gameID > game_count)
                 {
-                    std::cout << "gameID < game_count" << std::endl;
+                    std::cout << "gameID > game_count" << std::endl;
                     isPlayerConection = false;
                 }
 //--------------------------------------------------------------------------//
@@ -296,7 +308,73 @@ std::cout << "_________________________________________________" << std::endl;
                 }
             }
             else if(isConection == answerNo)  // при подключении к игре пользователь не прошел верификацию
+            {
+                answer = "View game statuses? ";
+                clientBuff = df.clearBuf(clientBuff);
+                clientBuff = df.convert_string_to_char(clientBuff, answer);
+                std::cout << clientBuff.data();
+                packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+                if (packet_size == SOCKET_ERROR)
+                {
+                    std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientConn);
+                }
+                packet_size = recv(ClientConn, servBuff.data(), servBuff.size(), 0);
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientConn);
+                }
+                else
+                    std::cout << servBuff.data();
+                std::string isViewing;
+                isViewing = df.convert_char_to_string(servBuff, isViewing);
+                if(isViewing == answerYes)
+                {
+                    //...
+                    int Game_Count = games->size();
+                    int game0 = 0, game1 = 0, game2 = 0;
+                    for(int c = 0; c < Game_Count; c++)
+                    {
+                        if(games->at(c).game_status == 0)
+                            game0 ++;
+                        else if(games->at(c).game_status == 1)
+                            game1 ++;
+                        else if(games->at(c).game_status == 2)
+                            game2 ++;
+                    }
+                    answer = "Game ready to start: " + std::to_string(game0);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
+                    std::cout << clientBuff.data() << std::endl;
+                    packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+                    if (packet_size == SOCKET_ERROR)
+                    {
+                        std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientConn);
+                    }
+                    answer = "Game are going: " + std::to_string(game1);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
+                    std::cout << clientBuff.data() << std::endl;
+                    packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+                    if (packet_size == SOCKET_ERROR)
+                    {
+                        std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientConn);
+                    }
+                    answer = "Game are ending: " + std::to_string(game2);
+                    clientBuff = df.clearBuf(clientBuff);
+                    clientBuff = df.convert_string_to_char(clientBuff, answer);
+                    std::cout << clientBuff.data() << std::endl;
+                    packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
+                    if (packet_size == SOCKET_ERROR)
+                    {
+                        std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientConn);
+                    }
+                }
                 isPlayerConection = false;
+            }
         }
         else
         {
@@ -307,13 +385,13 @@ std::cout << "_________________________________________________" << std::endl;
     }
     closesocket(ServSock);
     WSACleanup();
-    return 0;
+    return gameID;
 }
 
 void game_creator::default_games(std::vector<game> *games)
 {
     game cur_game;
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < 6; i++)
     {
         cur_game.player_name.clear();
         if(i == 0)
@@ -362,6 +440,14 @@ void game_creator::default_games(std::vector<game> *games)
             cur_game.connection_player = 0;
             cur_game.player_name.push_back("PetrPetrov");
             cur_game.player_name.push_back("IvanIvanov");
+            games->push_back(cur_game);
+        }
+        else if (i == 5)
+        {
+            cur_game.gameID = 5;
+            cur_game.game_status = 0;
+            cur_game.connection_player = 0;
+            cur_game.player_name.push_back("PetrPetrov");
             games->push_back(cur_game);
         }
     }
