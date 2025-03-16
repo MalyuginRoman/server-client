@@ -93,9 +93,10 @@ public:
 struct game
 {
     int gameID;
-    int game_status;
+    int game_status;        // 0 - игра не началась, 1 - игра идет, 2 - игра закончена
     int connection_player;
     std::vector<std::string> player_name;
+    std::string player_win;
 };
 
 struct go_game
