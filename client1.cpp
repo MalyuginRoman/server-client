@@ -126,90 +126,38 @@ std::cout << "_________________________________________________" << std::endl;
 //--------------------------------------------------------------------------------
 // Create game
 //--------------------------------------------------------------------------------
-    //Key constants
-    const char SERVER_IP_G[] = "10.124.40.14";		// Enter IPv4 address of Server
-    const short SERVER_PORT_NUM_G = 8080;			// Enter Listening port on Server side
-    inet_pton(AF_INET, SERVER_IP_G, &ip_to_num);
-    erStat = WSAStartup(MAKEWORD(2,2), &wsData);
-    if (erStat != 0) {
-        std::cout << "Error WinSock version initializaion #";
-        std::cout << WSAGetLastError();
-        return 1;
-    }
-    else
-        std::cout << "WinSock initialization is OK" << std::endl;
-
-    bool isWork = true;
-    while(isWork)
+    bool isNonStop = true;
+    while(isNonStop)
     {
-        SOCKET ClientSock_g = isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
-        clientBuff = df.clearBuf(clientBuff);
-        clientBuff = df.convert_string_to_char(clientBuff, playerName);        // отправляем имя подключившегося игрока
-        //std::cout << clientBuff.data() << std::endl;
-        packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
-        if (packet_size == SOCKET_ERROR)
-        {
-            std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_g);
-            WSACleanup();
-            return 1;
-        }
-        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "What are you want?"
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_g);
-            WSACleanup();
+
+        //Key constants
+        const char SERVER_IP_G[] = "10.124.40.14";		// Enter IPv4 address of Server
+        const short SERVER_PORT_NUM_G = 8080;			// Enter Listening port on Server side
+        inet_pton(AF_INET, SERVER_IP_G, &ip_to_num);
+        erStat = WSAStartup(MAKEWORD(2,2), &wsData);
+        if (erStat != 0) {
+            std::cout << "Error WinSock version initializaion #";
+            std::cout << WSAGetLastError();
             return 1;
         }
         else
-            std::cout << servBuff.data() << std::endl;
-        //vector <char> servBuff(BUFF_SIZE_G), clientBuff(BUFF_SIZE_G);		// Buffers for sending and receiving data
-        //short packet_size = 0;											// The size of sending / receiving packet in bytes
-        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Create game?"
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_g);
-            WSACleanup();
-            return 1;
-        }
-        else
-            std::cout << servBuff.data();
-        clientBuff = df.clearBuf(clientBuff);
-        fgets(clientBuff.data(), clientBuff.size(), stdin);
-        packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_g);
-            WSACleanup();
-            return 1;
-        }
-        std::string isCreating;
-        isCreating = df.convert_char_to_string(clientBuff, isCreating);
-        std::string answerYes = "Yes";
-        std::string answerNo  = "No" ;
-        if(isCreating == answerYes)
+            std::cout << "WinSock initialization is OK" << std::endl;
+
+        bool isWork = true;
+        while(isWork)
         {
-            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Number players:"
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_g);
-                WSACleanup();
-                return 1;
-            }
-            else
-                std::cout << servBuff.data();
+            SOCKET ClientSock_g = isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
             clientBuff = df.clearBuf(clientBuff);
-            fgets(clientBuff.data(), clientBuff.size(), stdin);
-            std::string numberPlayers;
-            numberPlayers = df.convert_char_to_string(clientBuff, numberPlayers);
+            clientBuff = df.convert_string_to_char(clientBuff, playerName);        // отправляем имя подключившегося игрока
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+            if (packet_size == SOCKET_ERROR)
+            {
+                std::cout << "Can't send message to Client. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientSock_g);
                 WSACleanup();
                 return 1;
             }
-            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
+            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "What are you want?"
             if (packet_size == SOCKET_ERROR) {
                 std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientSock_g);
@@ -218,7 +166,9 @@ std::cout << "_________________________________________________" << std::endl;
             }
             else
                 std::cout << servBuff.data() << std::endl;
-            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
+            //vector <char> servBuff(BUFF_SIZE_G), clientBuff(BUFF_SIZE_G);		// Buffers for sending and receiving data
+            //short packet_size = 0;											// The size of sending / receiving packet in bytes
+            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Create game?"
             if (packet_size == SOCKET_ERROR) {
                 std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientSock_g);
@@ -229,40 +179,40 @@ std::cout << "_________________________________________________" << std::endl;
                 std::cout << servBuff.data();
             clientBuff = df.clearBuf(clientBuff);
             fgets(clientBuff.data(), clientBuff.size(), stdin);
-            packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
+            packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
             if (packet_size == SOCKET_ERROR) {
                 std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientSock_g);
                 WSACleanup();
                 return 1;
             }
-            std::string isConcrete;
-            isConcrete = df.convert_char_to_string(clientBuff, isConcrete);
-            if(isConcrete == answerYes)
+            std::string isCreating;
+            isCreating = df.convert_char_to_string(clientBuff, isCreating);
+            std::string answerYes = "Yes";
+            std::string answerNo  = "No" ;
+            if(isCreating == answerYes)
             {
-                int numPlayers = std::stoi(numberPlayers);
-                for(int i = 0; i < numPlayers; i++)
-                {
-                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"
-                    if (packet_size == SOCKET_ERROR) {
-                        std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                        closesocket(ClientSock_g);
-                        WSACleanup();
-                        return 1;
-                    }
-                    else
-                        std::cout << servBuff.data();
-                    clientBuff = df.clearBuf(clientBuff);
-                    fgets(clientBuff.data(), clientBuff.size(), stdin);
-                    packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
-                    if (packet_size == SOCKET_ERROR) {
-                        std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-                        closesocket(ClientSock_g);
-                        WSACleanup();
-                        return 1;
-                    }
+                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Number players:"
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
                 }
-                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"   // <== "Start creating game ..."
+                else
+                    std::cout << servBuff.data();
+                clientBuff = df.clearBuf(clientBuff);
+                fgets(clientBuff.data(), clientBuff.size(), stdin);
+                std::string numberPlayers;
+                numberPlayers = df.convert_char_to_string(clientBuff, numberPlayers);
+                packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
+                }
+                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
                 if (packet_size == SOCKET_ERROR) {
                     std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                     closesocket(ClientSock_g);
@@ -271,43 +221,74 @@ std::cout << "_________________________________________________" << std::endl;
                 }
                 else
                     std::cout << servBuff.data() << std::endl;
+                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
+                }
+                else
+                    std::cout << servBuff.data();
+                clientBuff = df.clearBuf(clientBuff);
+                fgets(clientBuff.data(), clientBuff.size(), stdin);
+                packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
+                }
+                std::string isConcrete;
+                isConcrete = df.convert_char_to_string(clientBuff, isConcrete);
+                if(isConcrete == answerYes)
+                {
+                    int numPlayers = std::stoi(numberPlayers);
+                    for(int i = 0; i < numPlayers; i++)
+                    {
+                        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                        else
+                            std::cout << servBuff.data();
+                        clientBuff = df.clearBuf(clientBuff);
+                        fgets(clientBuff.data(), clientBuff.size(), stdin);
+                        packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                    }
+                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"   // <== "Start creating game ..."
+                    if (packet_size == SOCKET_ERROR) {
+                        std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientSock_g);
+                        WSACleanup();
+                        return 1;
+                    }
+                    else
+                        std::cout << servBuff.data() << std::endl;
+                }
+                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
+                }
+                std::string usingGameIDstring = df.convert_char_to_string(servBuff, usingGameIDstring);
+                usingGameID = stoi(usingGameIDstring);
+                isWork = false;                 // выходим из цикла Create Game
             }
-            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_g);
-                WSACleanup();
-                return 1;
-            }
-            std::string usingGameIDstring = df.convert_char_to_string(servBuff, usingGameIDstring);
-            usingGameID = stoi(usingGameIDstring);
-            isWork = false;                 // выходим из цикла Create Game
-        }
-        else if(isCreating == answerNo)
-        {
-            packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Connection to Game? "
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_g);
-                WSACleanup();
-                return 1;
-            }
-            else
-                std::cout << servBuff.data();
-            fgets(clientBuff.data(), clientBuff.size(), stdin);
-            packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if connection to Game
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_g);
-                WSACleanup();
-                return 1;
-            }
-            std::string isConnection;
-            isConnection = df.convert_char_to_string(clientBuff, isConnection);
-            if(isConnection == answerYes)
+            else if(isCreating == answerNo)
             {
-                //...
-                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Write game ID: "
+                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Connection to Game? "
                 if (packet_size == SOCKET_ERROR) {
                     std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                     closesocket(ClientSock_g);
@@ -317,148 +298,155 @@ std::cout << "_________________________________________________" << std::endl;
                 else
                     std::cout << servBuff.data();
                 fgets(clientBuff.data(), clientBuff.size(), stdin);
-                packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // game ID
+                packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if connection to Game
                 if (packet_size == SOCKET_ERROR) {
                     std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
                     closesocket(ClientSock_g);
                     WSACleanup();
                     return 1;
                 }
-                std::string usingGameIDstring;
-                usingGameIDstring = df.convert_char_to_string(clientBuff, usingGameIDstring);
-                //...
-                packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
-                if (packet_size == SOCKET_ERROR) {
-                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                    closesocket(ClientSock_g);
-                    WSACleanup();
-                    return 1;
-                }
-                else
-                    std::cout << servBuff.data() << std::endl;
-                std::string isPlayerConection;
-                isPlayerConection = df.convert_char_to_string(servBuff, isPlayerConection);
-                if(isPlayerConection == "You are connection in game")
+                std::string isConnection;
+                isConnection = df.convert_char_to_string(clientBuff, isConnection);
+                if(isConnection == answerYes)
                 {
-                    //...
-                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
+                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Write game ID: "
                     if (packet_size == SOCKET_ERROR) {
                         std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                         closesocket(ClientSock_g);
                         WSACleanup();
                         return 1;
                     }
-                    usingGameID = stoi(usingGameIDstring);
-                    isWork = false;                 // выходим из цикла Create Game
+                    else
+                        std::cout << servBuff.data();
+                    fgets(clientBuff.data(), clientBuff.size(), stdin);
+                    packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // game ID
+                    if (packet_size == SOCKET_ERROR) {
+                        std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientSock_g);
+                        WSACleanup();
+                        return 1;
+                    }
+                    std::string usingGameIDstring;
+                    usingGameIDstring = df.convert_char_to_string(clientBuff, usingGameIDstring);
+                    //...
+                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
+                    if (packet_size == SOCKET_ERROR) {
+                        std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientSock_g);
+                        WSACleanup();
+                        return 1;
+                    }
+                    else
+                        std::cout << servBuff.data() << std::endl;
+                    std::string isPlayerConection;
+                    isPlayerConection = df.convert_char_to_string(servBuff, isPlayerConection);
+                    if(isPlayerConection == "You are connection in game")
+                    {
+                        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                        usingGameID = stoi(usingGameIDstring);
+                        isWork = false;                 // выходим из цикла Create Game
+                    }
+                    else if(isPlayerConection == "You are not connection in game")
+                    {
+                        //...                           // повторяем цикл
+                    }
                 }
-                else if(isPlayerConection == "You are not connection in game")
+                else if(isConnection == answerNo)
                 {
-                    //...                           // повторяем цикл
+                    packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "View game statuses?"
+                    if (packet_size == SOCKET_ERROR) {
+                        std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientSock_g);
+                        WSACleanup();
+                        return 1;
+                    }
+                    else
+                        std::cout << servBuff.data();
+                    fgets(clientBuff.data(), clientBuff.size(), stdin);
+                    packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // "Yes" or "No"
+                    if (packet_size == SOCKET_ERROR) {
+                        std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                        closesocket(ClientSock_g);
+                        WSACleanup();
+                        return 1;
+                    }
+                    std::string isViewing;
+                    isViewing = df.convert_char_to_string(clientBuff, isViewing);
+                    if(isViewing == answerYes)
+                    {
+                        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Game ready to start"
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                        else
+                            std::cout << servBuff.data() << std::endl;
+                        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Game are going"
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                        else
+                            std::cout << servBuff.data() << std::endl;
+                        packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Game are ending"
+                        if (packet_size == SOCKET_ERROR) {
+                            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                            closesocket(ClientSock_g);
+                            WSACleanup();
+                            return 1;
+                        }
+                        else
+                            std::cout << servBuff.data() << std::endl;
+                    }
                 }
-            }
-            else if(isConnection == answerNo)
-            {
-                //...
+                else
+                {
+                    std::cout << "Invalid answer " << std::endl;
+                    closesocket(ClientSock_g);
+                    WSACleanup();
+                    return 1;
+                }
             }
             else
             {
                 std::cout << "Invalid answer " << std::endl;
                 closesocket(ClientSock_g);
-                WSACleanup();
-                return 1;
             }
-        }
-        else
-        {
-            std::cout << "Invalid answer " << std::endl;
             closesocket(ClientSock_g);
         }
-        closesocket(ClientSock_g);
-    }
-//-------------------------------------------------------------------------------- Start game - UserAction raund by raund
-// Start game
-//--------------------------------------------------------------------------------
-    //Key constants
-    const char SERVER_IP_C[] = "10.124.40.14";		// Enter IPv4 address of Server
-    const short SERVER_PORT_NUM_C = 8008;			// Enter Listening port on Server side
-    inet_pton(AF_INET, SERVER_IP_C, &ip_to_num);
-    erStat = WSAStartup(MAKEWORD(2,2), &wsData);
-    if (erStat != 0) {
-        std::cout << "Error WinSock version initializaion #";
-        std::cout << WSAGetLastError();
-        return 1;
-    }
-    else
-        std::cout << "WinSock initialization is OK" << std::endl;
-    int max_round_count = 100;
-    int current_round = 0;
-    while(current_round < max_round_count)
-    {
-        SOCKET ClientSock_c = isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
-        current_round++;
-        clientBuff = df.clearBuf(clientBuff);
-        std::string answer = playerName;                                        // получение UserName
-        clientBuff = df.convert_string_to_char(clientBuff, answer);
-        packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
-            return 1;
-        }
-        clientBuff = df.clearBuf(clientBuff);
-        answer = std::to_string(usingGameID);                                   // получение GameID
-        clientBuff = df.convert_string_to_char(clientBuff, answer);
-        packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
-            return 1;
-        }
-        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "________"
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
+    //-------------------------------------------------------------------------------- Start game - UserAction raund by raund
+    // Start game
+    //--------------------------------------------------------------------------------
+        //Key constants
+        const char SERVER_IP_C[] = "10.124.40.14";		// Enter IPv4 address of Server
+        const short SERVER_PORT_NUM_C = 8008;			// Enter Listening port on Server side
+        inet_pton(AF_INET, SERVER_IP_C, &ip_to_num);
+        erStat = WSAStartup(MAKEWORD(2,2), &wsData);
+        if (erStat != 0) {
+            std::cout << "Error WinSock version initializaion #";
+            std::cout << WSAGetLastError();
             return 1;
         }
         else
-            std::cout << servBuff.data() << std::endl;
-        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Round = ..."
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
-            return 1;
-        }
-        else
-            std::cout << servBuff.data() << std::endl;
-        packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write your action: "
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
-            return 1;
-        }
-        else
-            std::cout << servBuff.data() << std::endl;
-        clientBuff = df.clearBuf(clientBuff);
-        fgets(clientBuff.data(), clientBuff.size(), stdin);
-        packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock_c);
-            WSACleanup();
-            return 1;
-        }
-        std::string UserAction;
-        UserAction = df.convert_char_to_string(clientBuff, UserAction);
-        std::string answerStartMove = "StartMove" ;
-        std::string answerRotate = "Rotate" ;
-        if(UserAction == answerStartMove)
+            std::cout << "WinSock initialization is OK" << std::endl;
+        int max_round_count = 100;
+        int current_round = 0;
+        while(current_round < max_round_count)
         {
-            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write initial velocity: "
+            SOCKET ClientSock_c = isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
+            current_round++;
+//-----------------------------------------------------------------------------------
+            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== Game status - resume or over
             if (packet_size == SOCKET_ERROR) {
                 std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
                 closesocket(ClientSock_c);
@@ -466,7 +454,59 @@ std::cout << "_________________________________________________" << std::endl;
                 return 1;
             }
             else
-                std::cout << servBuff.data();
+                std::cout << servBuff.data() << std::endl;
+            std::string Game_status;
+            Game_status = df.convert_char_to_string(servBuff, Game_status);
+            if(Game_status == "Game Over!")
+                break;
+//-----------------------------------------------------------------------------------
+            clientBuff = df.clearBuf(clientBuff);
+            std::string answer = playerName;                                        // получение UserName
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            clientBuff = df.clearBuf(clientBuff);
+            answer = std::to_string(usingGameID);                                   // получение GameID
+            clientBuff = df.convert_string_to_char(clientBuff, answer);
+            packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "________"
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            else
+                std::cout << servBuff.data() << std::endl;
+            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Round = ..."
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            else
+                std::cout << servBuff.data() << std::endl;
+            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write your action: "
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            else
+                std::cout << servBuff.data() << std::endl;
             clientBuff = df.clearBuf(clientBuff);
             fgets(clientBuff.data(), clientBuff.size(), stdin);
             packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
@@ -476,32 +516,79 @@ std::cout << "_________________________________________________" << std::endl;
                 WSACleanup();
                 return 1;
             }
-        }
-        else if(UserAction == answerRotate)
-        {
-            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write angle: "
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_c);
-                WSACleanup();
-                return 1;
+            std::string UserAction;
+            UserAction = df.convert_char_to_string(clientBuff, UserAction);
+            std::string answerStartMove = "StartMove" ;
+            std::string answerRotate = "Rotate" ;
+            if(UserAction == answerStartMove)
+            {
+                packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write initial velocity: "
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_c);
+                    WSACleanup();
+                    return 1;
+                }
+                else
+                    std::cout << servBuff.data();
+                clientBuff = df.clearBuf(clientBuff);
+                fgets(clientBuff.data(), clientBuff.size(), stdin);
+                packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_c);
+                    WSACleanup();
+                    return 1;
+                }
             }
-            else
-                std::cout << servBuff.data();
-            clientBuff = df.clearBuf(clientBuff);
-            fgets(clientBuff.data(), clientBuff.size(), stdin);
-            packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
-            if (packet_size == SOCKET_ERROR) {
-                std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-                closesocket(ClientSock_c);
-                WSACleanup();
-                return 1;
+            else if(UserAction == answerRotate)
+            {
+                packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Write angle: "
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_c);
+                    WSACleanup();
+                    return 1;
+                }
+                else
+                    std::cout << servBuff.data();
+                clientBuff = df.clearBuf(clientBuff);
+                fgets(clientBuff.data(), clientBuff.size(), stdin);
+                packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
+                if (packet_size == SOCKET_ERROR) {
+                    std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+                    closesocket(ClientSock_c);
+                    WSACleanup();
+                    return 1;
+                }
             }
-        }
 
-        closesocket(ClientSock_c);
+            packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Resume Game!!!" or "Game over!!!"
+            if (packet_size == SOCKET_ERROR) {
+                std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+                closesocket(ClientSock_c);
+                WSACleanup();
+                return 1;
+            }
+            else
+                std::cout << servBuff.data();
+            std::string isGameStatus;
+            servBuff = df.clearBuf(servBuff);
+            isGameStatus = df.convert_char_to_string(servBuff, isGameStatus);
+            if(isGameStatus == "Resume Game!!!")
+            {
+                //...
+            }
+            else if(isGameStatus == "Game over!!!")
+            {
+                closesocket(ClientSock_c);
+                break;
+            }
+
+            closesocket(ClientSock_c);
+        }
+        WSACleanup();
+    //--------------------------------------------------------------------------------
     }
-    WSACleanup();
-//--------------------------------------------------------------------------------
     return 0;
 }
