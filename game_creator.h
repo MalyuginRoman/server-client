@@ -17,7 +17,7 @@ class game_creator
 {
 public:
     void default_games(std::vector<game> *games);
-    bool game_create(std::vector<game> *games);
+    int game_create(std::vector<game> *games);
 };
 
 #endif // GAME_CREATOR_H
