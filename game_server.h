@@ -20,7 +20,7 @@
 class game_server
 {
 public:
-    bool game_server_main(std::vector<game> *games, SOCKET ServSock);
+    bool game_server_main(std::vector<game> *games, int gameID, SOCKET ServSock);
     SOCKET bind_server();
 };
 
