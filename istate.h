@@ -1,5 +1,4 @@
-#ifndef ISTATE_H
-#define ISTATE_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -81,5 +80,3 @@ public:
     ExitState() : State("Exit", nullptr) {}
     virtual void execute(StateStatus *state, ICommand *cmd);
 };
-
-#endif // ISTATE_H
