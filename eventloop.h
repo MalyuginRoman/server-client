@@ -1,5 +1,4 @@
-#ifndef EVENTLOOP_H
-#define EVENTLOOP_H
+#pragma once
 #include <iostream>
 #include "icommand.h"
 #include "safequeue.h"
@@ -19,5 +18,3 @@ public:
 private:
     class eventloopP* imp;
 };
-
-#endif // EVENTLOOP_H
