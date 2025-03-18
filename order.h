@@ -1,5 +1,4 @@
-#ifndef ORDER_H
-#define ORDER_H
+#pragma once
 #include <string>
 #include <vector>
 #include <list>
@@ -33,10 +32,7 @@ public:
     order* add(int playerID, int objectID, std::string actionName, std::string specParam);
     bool isEmpty() const;
     size_t count() const;
-    const std::list/*vector*/<order *> vector() const;
-    //order* at(int i);
+    const std::list<order *> vector() const;
 private:
     class orderVectorP* imp;
 };
-
-#endif // ORDER_H
