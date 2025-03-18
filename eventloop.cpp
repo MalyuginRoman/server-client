@@ -22,22 +22,17 @@ eventloop::~eventloop() { delete imp; }
 
 void eventloop::start(SafeQueue<ICommand *> *cmds, StateStatus *status)
 {
-    //std::cout << "__________" << std::endl;
-    //std::cout << "I am here!" << std::endl;
     bool stop = false;
-    int ic = 0;
     SafeQueue<ICommand*> cmds_1;
     std::exception ex;
     ExceptionHandler* handler = new ExceptionHandler(0, ex);
 
     std::thread t1(
-                [&cmds, &stop, &ic, &ex, &handler, &status, &cmds_1](){
+                [&cmds, &stop, &ex, &handler, &status, &cmds_1](){
         try {
                 while(!stop)
                 {
-                    ic += 1;
                     ICommand* cmd = cmds->front();
-//                    std::cout << "Start execute ";
                     cmd->execute();
                     cmds->pop();
                     if(cmd->get_Id_cmd() == CommandHardStop)
@@ -80,7 +75,5 @@ void eventloop::start(SafeQueue<ICommand *> *cmds, StateStatus *status)
 
 void eventloop::execute(ICommand *cmd)
 {
-//    std::cout << "Start execute ";
     cmd->execute();
-    std::cout << std::endl;
 }
