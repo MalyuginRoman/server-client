@@ -12,7 +12,7 @@ int main(int ac, char **av)
     while(true)
     {
         //readFuelConfig();
-        SOCKET ServSock = gs.bind_server();
+        int ServSock = gs.bind_server();
         int gameID = gc.game_create(&games);
         bool gs_int = gs.game_server_main(&games, gameID, ServSock);
     }
