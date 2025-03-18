@@ -494,7 +494,7 @@ void BurnCommand::execute()
 {
     if(imp->obj->place().placeX < 0 && imp->obj->place().placeY < 0)
         throw std::runtime_error ("Object not found");
-    imp->obj->getFuel(imp->obj, 1);
+    imp->obj->getFuel(imp->obj/*, 1*/);
 }
 
 int BurnCommand::get_Id_cmd()
@@ -548,4 +548,38 @@ int CheckCommand::get_Id_parent()
 object* CheckCommand::obj() const
 {
     return imp->obj;
+}
+
+class RegisterCommandP
+{
+public:
+    std::map<std::string, std::function<ICommand*()>> *m_map;
+    std::map<std::string, std::string> *m_scope;
+
+    RegisterCommandP(std::map<std::string, std::function<ICommand*()>> *m_map,
+                     std::map<std::string, std::string> *m_scope) :
+        m_map(m_map),
+        m_scope(m_scope)
+    {
+    }
+};
+
+RegisterCommand::RegisterCommand(std::map<std::string, std::function<ICommand*()>> *m_map,
+                                 std::map<std::string, std::string> *m_scope) :
+    imp(new RegisterCommandP(m_map, m_scope))
+{
+}
+
+RegisterCommand::~RegisterCommand() { delete imp;}
+
+void RegisterCommand::execute()
+{
+}
+
+void RegisterCommand::registerType(std::string key_s, std::string key_f,
+                                   std::function<ICommand*()> func)
+{
+    imp->m_scope->emplace(key_s, key_f);
+    imp->m_map->emplace(key_f, func);
+    std::cout << "Registre " << key_f << " in " << key_s << std::endl;
 }
