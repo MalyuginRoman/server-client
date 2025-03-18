@@ -1,5 +1,4 @@
-#ifndef IMOVING_H
-#define IMOVING_H
+#pragma once
 class object;
 
 class IMoving
@@ -10,5 +9,3 @@ public:
     virtual bool getVelocity(object *obj, double du) = 0;
     virtual bool setVelocity(object *obj) = 0;
 };
-
-#endif // IMOVING_H
