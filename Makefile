@@ -4,7 +4,6 @@ all:
 	g++ -std=c++17 client_1.cpp -o client_1
 test:
 	chmod +x server_a
-	./server_a_test
-	./client_1
+	./server_a_test client_1
 clean:
 	$(RM) server_a server_a_test client_1
