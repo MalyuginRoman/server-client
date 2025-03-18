@@ -146,8 +146,9 @@ bool object::setAngularVelocity(object *obj)
     return true;
 }
 
-bool object::getFuel(object *obj, int dF)
+bool object::getFuel(object *obj/*, int dF*/)
 {
+    int dF = readFuelConfig();
     try
     {
         if(dt > 0)
@@ -206,6 +207,7 @@ public:
     }
     object *at(int i)
     {
+//std::cout << "objectVectorP " << i << std::endl;
         return vector.at(i);
     }
 };
@@ -243,5 +245,6 @@ const std::vector<object *> objectVector::vector() const
 
 object *objectVector::at(int i)
 {
+//std::cout << "objectVector " << i << std::endl;
     return imp->at(i);
 }
