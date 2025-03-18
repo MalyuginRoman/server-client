@@ -1,5 +1,4 @@
-#ifndef ICOMMAND_H
-#define ICOMMAND_H
+#pragma once
 #include <iostream>
 #include <list>
 #include <map>
@@ -27,6 +26,7 @@ enum CommandCodes
     CommandStart = 13,
     CommandStop = 14,
     CommandShoot = 15,
+    CommandRegister = 16,
     CommandMacro = 100
 };
 
@@ -142,7 +142,7 @@ public:
     }
     void execute()
     {
-        std::cout << "EmptyCommand" << std::endl;
+        //std::cout << "EmptyCommand" << std::endl;
     }
 };
 
@@ -178,6 +178,32 @@ public:
     {
         std::cout << "SoftStopCommand" << std::endl;
     }
+};
+
+class RegisterCommand : public ICommand
+{
+public:
+    RegisterCommand(std::map<std::string, std::function<ICommand*()>> *m_map,
+                    std::map<std::string, std::string> *m_scope);
+    ~RegisterCommand();
+    std::map<std::string, std::function<ICommand*()>> *m_map;
+    std::map<std::string, std::string> *m_scope;
+
+    int get_Id_cmd()
+    {
+        return CommandRegister;
+    }
+    int get_Id_parent()
+    {
+        return 9999;
+    }
+    void execute();
+    void registerType(std::string key_s,
+                      std::string key_f,
+                      std::function<ICommand*()> func);
+
+private:
+    class RegisterCommandP* imp;
 };
 
 class InternetCommand : public ICommand
@@ -331,4 +357,3 @@ public:
 private:
     class MacroCommandP* imp;
 };
-#endif // ICOMMAND_H
