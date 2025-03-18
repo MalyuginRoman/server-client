@@ -223,7 +223,7 @@ std::cout << obj_vector.at(t)->playerID() << " : "
     return 0;
 }
 
-SOCKET game_server::bind_server()
+int game_server::bind_server()
 {
     const char IP_SERV[] = "10.124.40.14";
     const int PORT_NUM = 8008;
