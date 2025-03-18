@@ -1,5 +1,4 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#pragma once
 #include "minor.h"
 #include "imoving.h"
 #include "irotatable.h"
@@ -28,7 +27,7 @@ public:
     bool getAngularVelocity(object *obj, int dv);
     bool setAngularVelocity(object *obj);
 
-    bool getFuel(object *obj, int dF);
+    bool getFuel(object *obj/*, int dF*/);
 
 private:
     class objectP* imp;
@@ -50,5 +49,3 @@ public:
 private:
     class objectVectorP* imp;
 };
-
-#endif // OBJECT_H
