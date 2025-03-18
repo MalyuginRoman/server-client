@@ -8,14 +8,14 @@
 class gameP
 {
 public:
-    std::map<std::string, std::function<ICommand*()>> *m_map;
-    std::map<std::string, std::string> *m_scope;
+    std::map<std::string, std::function<ICommand*()>> m_map;
+    std::map<std::string, std::string> m_scope;
     std::vector<player> *player_list;
     objectVector *obj_vector;
 
 
-    gameP(std::map<std::string, std::function<ICommand*()>> *m_map,
-                std::map<std::string, std::string> *m_scope,
+    gameP(std::map<std::string, std::function<ICommand*()>> m_map,
+                std::map<std::string, std::string> m_scope,
                 std::vector<player> *player_list,
                 objectVector *obj_vector) :
         m_map(m_map),
@@ -26,8 +26,8 @@ public:
     }
 };
 
-start_game::start_game(std::map<std::string, std::function<ICommand*()>> *m_map,
-                       std::map<std::string, std::string> *m_scope,
+start_game::start_game(std::map<std::string, std::function<ICommand*()>> m_map,
+                       std::map<std::string, std::string> m_scope,
                        std::vector<player> *player_list,
                        objectVector *obj_vector) :
     imp(new gameP(m_map, m_scope, player_list, obj_vector))
@@ -118,16 +118,40 @@ void start_game::create_player(std::string playerName,
     p_map_c_b = op.func_obj(p_map_c_b, obj_vector);
 }
 
+
+
+game_scope start_game::filling_scope(std::map<std::string, std::function<ICommand*()>> m_map,
+                                     std::map<std::string, std::string> m_scope)
+{
+    game_scope new_scope;
+//-------------------------------------------------------------
+//   Регистрация пустой дефолтной зависимости в Скоупе
+//-------------------------------------------------------------
+    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+    cmd_registr->registerType(
+                "Scope1",
+                "None",
+                []() {
+                return new EmptyCommand(); });
+    new_scope.m_map = m_map;
+    new_scope.m_scope = m_scope;
+    return new_scope;
+}
+
+
 void start_game::play_round(orderVector *player_messages,
                             std::vector<player> *player_list,  // для добавления ракет при выстреле
                             objectVector *obj_vector,
                             std::map<int, system_okr> *p_map_c_a,
-                            std::map<int, system_okr> *p_map_c_b)
+                            std::map<int, system_okr> *p_map_c_b,
+                            std::map<std::string, std::function<ICommand*()>> m_map,
+                            std::map<std::string, std::string> m_scope)
 {
     EmptyCommand *cmd_empty = new EmptyCommand();
     StateStatus *sc = new StateStatus(new DefaultState(), cmd_empty);
     SafeQueue<ICommand*> queueCmds;
     eventloop* game = new eventloop(&queueCmds, sc);
+    IocContainer<ICommand> ioc;
 
     std::string player_command;
     for(order* i : player_messages->vector())
@@ -142,14 +166,22 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if(obj_com == obj_cur)
                 {
-                    int newVelocity = stoi(i->specParam());
-                    obj_vector->at(j)->getVelocity(obj_vector->at(j), newVelocity);
-                    CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
-                    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
-                    BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
-                    queueCmds.push(cmd_check);
-                    queueCmds.push(cmd_move);
-                    queueCmds.push(cmd_burn);
+                    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+                    cmd_registr->registerType(
+                                "Scope1",
+                                "StartMove",
+                                [&obj_vector, &p_map_c_a, &p_map_c_b, &i, &j]() {
+                                int newVelocity = stoi(i->specParam());
+                                obj_vector->at(j)->getVelocity(obj_vector->at(j), newVelocity);
+                                CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
+                                MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
+                                BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
+                                std::list<ICommand*> cmd_list;
+                                cmd_list.push_back(cmd_check);
+                                cmd_list.push_back(cmd_move);
+                                cmd_list.push_back(cmd_burn);
+                                return new MacroCommand(cmd_list);});
+                    ioc.resolve("StartMove", m_map, m_scope, obj_vector->at(j))->execute();
                 }
             }
         }
@@ -162,12 +194,20 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if(obj_com == obj_cur)
                 {
-                    CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
-                    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
-                    BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
-                    queueCmds.push(cmd_check);
-                    queueCmds.push(cmd_move);
-                    queueCmds.push(cmd_burn);
+                    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+                    cmd_registr->registerType(
+                                "Scope1",
+                                "Go",
+                                [&obj_vector, &p_map_c_a, &p_map_c_b, &j]() {
+                                CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
+                                MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
+                                BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
+                                std::list<ICommand*> cmd_list;
+                                cmd_list.push_back(cmd_check);
+                                cmd_list.push_back(cmd_move);
+                                cmd_list.push_back(cmd_burn);
+                                return new MacroCommand(cmd_list);});
+                    ioc.resolve("Go", m_map, m_scope, obj_vector->at(j))->execute();
                 }
             }
         }
@@ -180,16 +220,24 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if(obj_com == obj_cur)
                 {
-                    int newAngle = stoi(i->specParam());
-                    obj_vector->at(j)->getAngularVelocity(obj_vector->at(j), newAngle);
-                    CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
-                    RotateCommand *cmd_rotate = new RotateCommand(obj_vector->at(j));
-                    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
-                    BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
-                    queueCmds.push(cmd_check);
-                    queueCmds.push(cmd_rotate);
-                    queueCmds.push(cmd_move);
-                    queueCmds.push(cmd_burn);
+                    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+                    cmd_registr->registerType(
+                                "Scope1",
+                                "Rotate",
+                                [&obj_vector, &p_map_c_a, &p_map_c_b, &i, &j]() {
+                                int newAngle = stoi(i->specParam());
+                                obj_vector->at(j)->getAngularVelocity(obj_vector->at(j), newAngle);
+                                CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
+                                RotateCommand *cmd_rotate = new RotateCommand(obj_vector->at(j));
+                                MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
+                                BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
+                                std::list<ICommand*> cmd_list;
+                                cmd_list.push_back(cmd_check);
+                                cmd_list.push_back(cmd_rotate);
+                                cmd_list.push_back(cmd_move);
+                                cmd_list.push_back(cmd_burn);
+                                return new MacroCommand(cmd_list);});
+                    ioc.resolve("Rotate", m_map, m_scope, obj_vector->at(j))->execute();
                 }
             }
         }
@@ -202,10 +250,15 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if(obj_com == obj_cur)
                 {
-                    int newVelocity = 0;
-                    obj_vector->at(j)->getVelocity(obj_vector->at(j), newVelocity);
-                    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
-                    queueCmds.push(cmd_move);
+                    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+                    cmd_registr->registerType(
+                                "Scope1",
+                                "StopMove",
+                                [&obj_vector, &p_map_c_a, &p_map_c_b, &j]() {
+                                int newVelocity = 0;
+                                obj_vector->at(j)->getVelocity(obj_vector->at(j), newVelocity);
+                                return new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j)); });
+                    ioc.resolve("StopMove", m_map, m_scope, obj_vector->at(j))->execute();
                 }
             }
         }
@@ -232,17 +285,26 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if((obj_com == obj_cur) && (obj_vector->at(j)->state().velocity != 0.))
                 {
-                    CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
-                    ShootCommand *cmd_shoot = new ShootCommand(p_map_c_a, p_map_c_b, obj_vector, obj_vector->at(j),
-                                                               obj_vector->at(j)->state().velocity,
-                                                               obj_vector->at(j)->place().angular);
-                    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
-                    BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
-                    queueCmds.push(cmd_check);
-                    queueCmds.push(cmd_shoot);
-                    queueCmds.push(cmd_move);
-                    queueCmds.push(cmd_burn);
-                    player_list->at(current_player).playerObject.push_back(objectId);
+                    RegisterCommand *cmd_registr = new RegisterCommand(&m_map, &m_scope);
+                    cmd_registr->registerType(
+                                "Scope1",
+                                "Shoot",
+                                [&obj_vector, &player_list, &p_map_c_a, &p_map_c_b, &j,
+                                &current_player, &objectId]() {
+                                CheckCommand *cmd_check = new CheckCommand(obj_vector->at(j));
+                                ShootCommand *cmd_shoot = new ShootCommand(p_map_c_a, p_map_c_b, obj_vector, obj_vector->at(j),
+                                                                           obj_vector->at(j)->state().velocity,
+                                                                           obj_vector->at(j)->place().angular);
+                                MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(j));
+                                BurnCommand *cmd_burn = new BurnCommand(obj_vector->at(j));
+                                std::list<ICommand*> cmd_list;
+                                cmd_list.push_back(cmd_check);
+                                cmd_list.push_back(cmd_shoot);
+                                cmd_list.push_back(cmd_move);
+                                cmd_list.push_back(cmd_burn);
+                                player_list->at(current_player).playerObject.push_back(objectId);
+                                return new MacroCommand(cmd_list);});
+                    ioc.resolve("Shoot", m_map, m_scope, obj_vector->at(j))->execute();
                 }
                 else if ((obj_com == obj_cur) && obj_vector->at(j)->state().velocity == 0.)
                 {
@@ -260,10 +322,11 @@ void start_game::play_round(orderVector *player_messages,
                 int obj_cur = obj_vector->at(j)->objectID();
                 if(obj_com == obj_cur)
                 {
-                    queueCmds.push(cmd_empty);
+                    ioc.resolve("None", m_map, m_scope, obj_vector->at(j))->execute();
                 }
             }
         }
+        queueCmds.push(cmd_empty);
 //------------------------------------------------------------------- // проверяем имеются ли у игрока запущенные ракеты
         std::list<int> pl_obj;
         int k1 = imp->obj_vector->count();
@@ -293,51 +356,6 @@ void start_game::play_round(orderVector *player_messages,
 //-------------------------------------------------------------------
     }
     game->start(&queueCmds, sc);
-
-//-------------------------------------------------------------
-//   Регистрация зависимостей в Скоупе (с учетом топлива)
-//-------------------------------------------------------------
-/*    // формируем макрокоманды
-    CheckCommand *cmd_check = new CheckCommand();
-    BurnCommand *cmd_burn = new BurnCommand();
-    MoveCommand *cmd_move = new MoveCommand(p_map_c_a, p_map_c_b, obj_vector->at(0));
-    RotateCommand *cmd_rotate = new RotateCommand(obj_vector->at(0));
-    LogerCommand *cmd_loger = new LogerCommand();
-    EmptyCommand *cmd_empty = new EmptyCommand();
-    HardStopCommand *cmd_hard = new HardStopCommand();
-    SoftStopCommand *cmd_soft = new SoftStopCommand();
-    StartMotion *cmd_start = new StartMotion(obj_vector->at(0), obj_vector->at(0)->state().velocity);
-    StopMotion *cmd_stop = new StopMotion(obj_vector->at(0));
-    ShootCommand *cmd_shoot = new ShootCommand(obj_vector, obj_vector->at(0));
-//-------------------------------------------------------------
-    std::list<ICommand*> cmd_list1, cmd_list2;
-    cmd_list1.push_back(cmd_check);
-    cmd_list1.push_back(cmd_move);
-    cmd_list1.push_back(cmd_burn);
-
-    my_scope->resolve("Scope2",
-                    "MacroCommand1",
-                    [&cmd_list1]() { return new MacroCommand(cmd_list1); });
-
-    cmd_list2.push_back(cmd_check);
-    cmd_list2.push_back(cmd_rotate);
-    cmd_list2.push_back(cmd_burn);
-    my_scope->resolve("Scope2",
-                    "MacroCommand2",
-                    [&cmd_list2]() { return new MacroCommand(cmd_list2); });
-//-------------------------------------------------------------
-    EmptyCommand *cmd_empty = new EmptyCommand();
-    StateStatus *sc = new StateStatus(new DefaultState(), cmd_empty);
-    SafeQueue<ICommand*> queueCmds1;
-    eventloop* game1 = new eventloop(&queueCmds1, sc);
-    InternetCommand* int_cmd = new InternetCommand(&obj_vector, obj_vector.at(current_obj),
-                                                    player_messages.at(count), &cmds);
-    my_scope->resolve("Scope2",
-                    "StartMove",
-                    [&vector, &current_obj, &message, &count, &cmds]()
-                    { return new MacroCommand(cmds); });
-    queueCmds3.push_list(cmds);
-    game3->start(&queueCmds3, sc, 1);*/
 }
 
 collisionObjects start_game::check_collision(objectVector *obj_vector,
