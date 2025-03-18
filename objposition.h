@@ -1,5 +1,4 @@
-#ifndef OBJPOSITION_H
-#define OBJPOSITION_H
+#pragma once
 #include <map>
 #include <list>
 #include "object.h"
@@ -14,5 +13,3 @@ public:
     std::map<int, system_okr> *func_obj(std::map<int, system_okr> *p_map, objectVector *vector);
     std::map<int, system_okr> *func_obj_r(std::map<int, system_okr> *p_map, object *obj);
 };
-
-#endif // OBJPOSITION_H
