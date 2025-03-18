@@ -9,5 +9,5 @@ class game_server
 {
 public:
     bool game_server_main(std::vector<game> *games, int gameID, int ServSock);
-    SOCKET bind_server();
+    int bind_server();
 };
