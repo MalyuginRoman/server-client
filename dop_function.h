@@ -1,5 +1,4 @@
-#ifndef DOP_FUNCTION_H
-#define DOP_FUNCTION_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -62,4 +61,3 @@ public:
     }
 };
 
-#endif // DOP_FUNCTION_H
