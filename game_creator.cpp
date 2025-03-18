@@ -42,7 +42,7 @@ std::cout << "_________________________________________________" << std::endl;
         struct sockaddr_in clientInfo;
         memset(&clientInfo, '0', sizeof(clientInfo));
         socklen_t clientInfo_size = sizeof(clientInfo);
-        int ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
+        int ClientConn = accept(servSock, (sockaddr*)&clientInfo, &clientInfo_size);
         std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
         short packet_size = 0;
 //----------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ std::cout << "_________________________________________________" << std::endl;
         }
         close(ClientConn);
     }
-    close(ServSock);
+    close(servSock);
     return gameID;
 }
 
