@@ -1,5 +1,6 @@
 #include "eventloop.h"
 #include "exceptionhandler.h"
+#include <thread>
 
 class eventloopP
 {
