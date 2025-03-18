@@ -1,5 +1,4 @@
-#ifndef EXCEPTIONHANDLER_H
-#define EXCEPTIONHANDLER_H
+#pragma once
 #include <iostream>
 #include "icommand.h"
 #include "safequeue.h"
@@ -18,5 +17,3 @@ public:
 private:
     class ExceptionHandlerP* imp;
 };
-
-#endif // EXCEPTIONHANDLER_H
