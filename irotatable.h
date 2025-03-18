@@ -1,5 +1,4 @@
-#ifndef IROTATABLE_H
-#define IROTATABLE_H
+#pragma once
 #include "object.h"
 
 class IRotatable
@@ -10,5 +9,3 @@ public:
     virtual bool getAngularVelocity(object *obj, int dv) = 0;
     virtual bool setAngularVelocity(object *obj) = 0;
 };
-
-#endif // IROTATABLE_H
