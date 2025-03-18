@@ -11,7 +11,7 @@
 #include "game_server.h"
 
 bool game_server::game_server_main(std::vector<game> *games, int gameID,
-                                   SOCKET ServSock1)
+                                   int ServSock1)
 {
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start GAME Server                        " << std::endl;
@@ -52,7 +52,7 @@ std::cout << "_________________________________________________" << std::endl;
         while(current_round < max_round_count)
         {
             games->at(gameID).game_status = 1;
-            listen(ServSock , SOMAXCONN);
+            listen(servSock , SOMAXCONN);
             struct sockaddr_in clientInfo;
             memset(&clientInfo, '0', sizeof(clientInfo));
             socklen_t clientInfo_size = sizeof(clientInfo);
@@ -74,14 +74,8 @@ std::cout << "_________________________________________________" << std::endl;
                 clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientConn, clientBuff.data(), clientBuff.size(), 0);
                 games->at(gameID).game_status = 2;
-                closesocket(ClientConn);
+                close(ClientConn);
                 disconnectUser ++;
-                if (packet_size == SOCKET_ERROR)
-                {
-                    close(ServSock);
-                    close(ClientConn);
-                    return 1;
-                }
                 break;
             }
 //-----------------------------------------------------------------------------------
@@ -225,7 +219,7 @@ std::cout << obj_vector.at(t)->playerID() << " : "
             close(ClientConn);
         }
     }
-    close(ServSock);
+    close(servSock);
     return 0;
 }
 
