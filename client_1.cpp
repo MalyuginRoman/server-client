@@ -12,14 +12,15 @@
 int isConnect(in_addr ip_to_num, short SERVER_PORT_NUM, int erStat)
 {
     int CreateSocket = 0;
-    CreateSocket = socket(AF_INET, SOCK_STREAM, 0);
-        if (ClientSock == INVALID_SOCKET) {
-            std::cout << "Error initialization socket # " << WSAGetLastError() << std::endl;
-            close(ClientSock);
-        }
-    servInfo.sin_family = AF_INET;
-    servInfo.sin_addr = ip_to_num;
-    servInfo.sin_port = htons(SERVER_PORT_NUM);
+    struct sockaddr_in ipOfServer;
+    if((CreateSocket = socket(AF_INET, SOCK_STREAM, 0))< 0)
+    {
+        printf("Socket not created \n");
+        return 1;
+    }
+    ipOfServer.sin_family = AF_INET;
+    ipOfServer.sin_addr = ip_to_num;
+    ipOfServer.sin_port = htons(SERVER_PORT_NUM);
     if(connect(CreateSocket, (struct sockaddr *)&ipOfServer, sizeof(ipOfServer))<0)
     {
         printf("Connection failed due to port and ip problems\n");
