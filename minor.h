@@ -1,10 +1,17 @@
-#ifndef MINOR_H
-#define MINOR_H
+#pragma once
+#include <iostream>
+#include <fstream>
 #include <vector>
 #include <list>
+#include <map>
+#include <functional>
+#include <filesystem>
+namespace fs = std::experimental::filesystem;
+
+class ICommand;
 
 const int dt = 1;
-const int dF = 1;
+//const int dF = 1;
 const double eps = 10E-6;
 const double Xmax = 100.;
 const double Ymax = 100.;
@@ -13,6 +20,7 @@ const int count_system_2 = 5;
 const double Umax = 15.;
 const double Udelta = 5.;
 
+int readFuelConfig();
 /*!
   Координаты и ориентация объекта
 */
@@ -93,7 +101,7 @@ public:
 struct game
 {
     int gameID;
-    int game_status;        // 0 - игра не началась, 1 - игра идет, 2 - игра закончена
+    int game_status;
     int connection_player;
     std::vector<std::string> player_name;
     std::string player_win;
@@ -105,4 +113,8 @@ struct go_game
     std::vector<std::string> player_name;
 };
 
-#endif // MINOR_H
+struct game_scope
+{
+    std::map<std::string, std::function<ICommand*()>> m_map;
+    std::map<std::string, std::string> m_scope;
+};
