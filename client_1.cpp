@@ -234,7 +234,6 @@ std::cout << "_________________________________________________" << std::endl;
                 clientBuff = df.clearBuf(clientBuff);
                 fgets(clientBuff.data(), clientBuff.size(), stdin);
                 packet_size = send(ClientSock_c, clientBuff.data(), clientBuff.size(), 0);
-                }
             }
             packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== "Resume Game!!!" or "Game over!!!"
             std::string isGameStatus;
@@ -244,7 +243,7 @@ std::cout << "_________________________________________________" << std::endl;
                 close(ClientSock_c);
                 break;
             }
-            closesocket(ClientSock_c);
+            close(ClientSock_c);
         }
 //--------------------------------------------------------------------------------
     }
