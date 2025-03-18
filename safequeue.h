@@ -1,5 +1,4 @@
-#ifndef SAFEQUEUE_H
-#define SAFEQUEUE_H
+#pragma once
 #include <iostream>
 #include <queue>
 #include <mutex>
@@ -45,5 +44,3 @@ class SafeQueue {
         std::mutex queueMutex;
         std::condition_variable cond_variable;
 };
-
-#endif // SAFEQUEUE_H
