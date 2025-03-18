@@ -9,25 +9,23 @@
 #include <cstring>
 #include <vector>
 #include "dop_function.h"
-SOCKET isConnect(in_addr ip_to_num, short SERVER_PORT_NUM, int erStat)
+int isConnect(in_addr ip_to_num, short SERVER_PORT_NUM, int erStat)
 {
-    SOCKET ClientSock = socket(AF_INET, SOCK_STREAM, 0);
+    int CreateSocket = 0;
+    CreateSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (ClientSock == INVALID_SOCKET) {
             std::cout << "Error initialization socket # " << WSAGetLastError() << std::endl;
             close(ClientSock);
         }
-    sockaddr_in servInfo;
-    ZeroMemory(&servInfo, sizeof(servInfo));
     servInfo.sin_family = AF_INET;
     servInfo.sin_addr = ip_to_num;
     servInfo.sin_port = htons(SERVER_PORT_NUM);
-    erStat = connect(ClientSock, (sockaddr*)&servInfo, sizeof(servInfo));
-    if (erStat != 0) {
-        std::cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << std::endl;
-        close(ClientSock);
-        return false;
+    if(connect(CreateSocket, (struct sockaddr *)&ipOfServer, sizeof(ipOfServer))<0)
+    {
+        printf("Connection failed due to port and ip problems\n");
+        return 1;
     }
-    return ClientSock;
+    return CreateSocket;
 }
 int main(void)
 {
@@ -49,7 +47,7 @@ std::cout << "_________________________________________________" << std::endl;
     std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
     short packet_size = 0;
     bool isNeedAutorization = true;
-    SOCKET ClientSock_a = isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
+    int ClientSock_a = isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
     while(isNeedAutorization)
     {
         packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
@@ -85,7 +83,7 @@ std::cout << "_________________________________________________" << std::endl;
         bool isWork = true;
         while(isWork)
         {
-            SOCKET ClientSock_g = isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
+            int ClientSock_g = isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, playerName);        // отправляем имя подключившегося игрока
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
@@ -194,7 +192,7 @@ std::cout << "_________________________________________________" << std::endl;
         int current_round = 0;
         while(current_round < max_round_count)
         {
-            SOCKET ClientSock_c = isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
+            int ClientSock_c = isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
             current_round++;
             packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== Game status - resume or over
             std::string Game_status;
