@@ -1,4 +1,5 @@
 #include "minor.h"
+namespace fs = std::filesystem;
 
 int readFuelConfig()
 {
