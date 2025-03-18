@@ -259,7 +259,7 @@ std::cout << "_________________________________________________" << std::endl;
         }
         close(ClientConn);
     }
-    closet(ServSock);
+    close(ServSock);
     return gameID;
 }
 
