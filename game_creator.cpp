@@ -23,12 +23,12 @@ std::cout << "_________________________________________________" << std::endl;
     const int PORT_NUM = 8080;
     const short BUFF_SIZE = 1024;
     in_addr ip_to_num;
-    int servSockD = socket(AF_INET, SOCK_STREAM, 0); 
+    int servSock = socket(AF_INET, SOCK_STREAM, 0); 
     struct sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
     servAddr.sin_addr = ip_to_num;
     servAddr.sin_port = htons(PORT_NUM);
-    bind(servSockD, (struct sockaddr*)&servAddr, 
+    bind(servSock, (struct sockaddr*)&servAddr, 
          sizeof(servAddr));
     std::string answerYes = "Yes";
     std::string answerNo  = "No" ;
@@ -38,8 +38,11 @@ std::cout << "_________________________________________________" << std::endl;
     current_game.gameID = 999;
     while (!isAllPlayer)                                                          // Цикл № 1 - для создания игра / определения наличия и формата доступа клиентов к игре
     {
-        listen(servSockD, 1); 
-        int ClientConn = accept(servSockD, NULL, NULL); 
+        listen(servSock, SOMAXCONN); 
+        struct sockaddr_in clientInfo;
+        memset(&clientInfo, '0', sizeof(clientInfo));
+        socklen_t clientInfo_size = sizeof(clientInfo);
+        int ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
         std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
         short packet_size = 0;
 //----------------------------------------------------------------------------------
