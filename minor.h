@@ -6,7 +6,6 @@
 #include <map>
 #include <functional>
 #include <filesystem>
-namespace fs = std::experimental::filesystem;
 
 class ICommand;
 
