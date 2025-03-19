@@ -48,7 +48,7 @@ std::cout << "_________________________________________________" << std::endl;
     std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
     short packet_size = 0;
     bool isNeedAutorization = true;
-    int ClientSock_a = isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
+    int ClientSock_a = 220; // isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
     while(isNeedAutorization)
     {
         packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
@@ -84,7 +84,7 @@ std::cout << "_________________________________________________" << std::endl;
         bool isWork = true;
         while(isWork)
         {
-            int ClientSock_g = isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
+            int ClientSock_g = 228; // isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, playerName);        // отправляем имя подключившегося игрока
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
@@ -193,7 +193,7 @@ std::cout << "_________________________________________________" << std::endl;
         int current_round = 0;
         while(current_round < max_round_count)
         {
-            int ClientSock_c = isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
+            int ClientSock_c = 228; // isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
             current_round++;
             packet_size = recv(ClientSock_c, servBuff.data(), servBuff.size(), 0);  // <== Game status - resume or over
             std::string Game_status;
