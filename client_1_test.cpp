@@ -115,8 +115,8 @@ std::cout << "End autorization" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Number players:"
                 clientBuff = df.clearBuf(clientBuff);
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                std::string numberPlayers = "4";
-                numberPlayers = df.convert_char_to_string(clientBuff, numberPlayers);
+                std::string numberPlayers;
+                numberPlayers = "4";// = df.convert_char_to_string(clientBuff, numberPlayers);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
@@ -142,7 +142,7 @@ std::cout << "End autorization" << std::endl;
                     //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
                 }
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
-                std::string usingGameIDstring = df.convert_char_to_string(servBuff, usingGameIDstring);
+                std::string usingGameIDstring = 5; // = df.convert_char_to_string(servBuff, usingGameIDstring);
                 usingGameID = stoi(usingGameIDstring);
                 //isWork = false;                 // выходим из цикла Create Game
                 iter_count_1 ++;
