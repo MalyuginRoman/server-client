@@ -213,7 +213,7 @@ std::cout << "End game create" << std::endl;
         const short SERVER_PORT_NUM_C = 8008;
         erStat = inet_pton(AF_INET, SERVER_IP_C, &ip_to_num);
         int max_round_count = 100;
-        int current_round = 0;
+        int current_round = 100;
         while(current_round < max_round_count)
         {
             int ClientSock_c = 228; // isConnect(ip_to_num, SERVER_PORT_NUM_C, erStat);
