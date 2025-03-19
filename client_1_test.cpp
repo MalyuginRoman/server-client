@@ -142,7 +142,7 @@ std::cout << "End autorization" << std::endl;
                     //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
                 }
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
-                std::string usingGameIDstring = 5; // = df.convert_char_to_string(servBuff, usingGameIDstring);
+                std::string usingGameIDstring = "5"; // = df.convert_char_to_string(servBuff, usingGameIDstring);
                 usingGameID = stoi(usingGameIDstring);
                 //isWork = false;                 // выходим из цикла Create Game
                 iter_count_1 ++;
