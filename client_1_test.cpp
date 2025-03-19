@@ -198,12 +198,14 @@ std::cout << "End autorization" << std::endl;
                         std::cout << servBuff.data() << std::endl;
                     }
                     iter_count_1 ++;
+            isNonStop = false;
                 }
                 else
                 {
                     std::cout << "Invalid answer " << std::endl;
                     close(ClientSock_g);
                     iter_count_1 ++;
+            isNonStop = false;
                     return 1;
                 }
             }
@@ -212,6 +214,7 @@ std::cout << "End autorization" << std::endl;
                 std::cout << "Invalid answer " << std::endl;
                 iter_count_1 ++;
                 close(ClientSock_g);
+            isNonStop = false;
             }
             close(ClientSock_g);
             iter_count_1 ++;
