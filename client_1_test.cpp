@@ -49,7 +49,7 @@ std::cout << "_________________________________________________" << std::endl;
     std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
     short packet_size = 0;
     bool isNeedAutorization = true;
-    int ClientSock_a = isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat); // 220;
+    int ClientSock_a = 220; // isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
     while(isNeedAutorization)
     {
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
@@ -66,7 +66,7 @@ std::cout << "_________________________________________________" << std::endl;
             clientBuff = df.convert_string_to_char(clientBuff, answer);
         packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
-        //std::string answer;
+            answer = "Your autorized!";
         answer = df.convert_char_to_string(servBuff, answer);
         std::string isGood = "Your autorized!";
         if(answer == isGood)
@@ -93,7 +93,6 @@ std::cout << "1" << std::endl;
         while(isWork)
         {
             int ClientSock_g = 228; // isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
-std::cout << "2" << std::endl;
             clientBuff = df.clearBuf(clientBuff);
             clientBuff = df.convert_string_to_char(clientBuff, playerName);        // отправляем имя подключившегося игрока
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
@@ -103,7 +102,6 @@ std::cout << "2" << std::endl;
             //fgets(clientBuff.data(), clientBuff.size(), stdin);
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
             std::string isCreating = "No";
-std::cout << "3" << std::endl;
             //isCreating = df.convert_char_to_string(clientBuff, isCreating);
             std::string answerYes = "Yes";
             std::string answerNo  = "No" ;
@@ -118,7 +116,6 @@ std::cout << "3" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Start creating game ..."
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
                 clientBuff = df.clearBuf(clientBuff);
-std::cout << "4" << std::endl;
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
                     std::string answer = "No";
                     clientBuff = df.convert_string_to_char(clientBuff, answer);
@@ -165,7 +162,6 @@ std::cout << "4" << std::endl;
                     //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);
                     std::string isPlayerConection;
                     isPlayerConection = "Yes"; //df.convert_char_to_string(servBuff, isPlayerConection);
-std::cout << "5" << std::endl;
                     if(isPlayerConection == answerYes)
                     {
                         usingGameID = stoi(usingGameIDstring);
