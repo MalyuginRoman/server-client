@@ -85,11 +85,11 @@ std::cout << "End autorization" << std::endl;
     bool isNonStop = true;
     while(isNonStop)
     {
-std::cout << "1" << std::endl;
         const char SERVER_IP_G[] = "10.124.40.14";
         const short SERVER_PORT_NUM_G = 8080;
         erStat = inet_pton(AF_INET, SERVER_IP_G, &ip_to_num);
         bool isWork = true;
+        int iter_count_1 = 0;
         while(isWork)
         {
             int ClientSock_g = 228; // isConnect(ip_to_num, SERVER_PORT_NUM_G, erStat);
@@ -101,10 +101,15 @@ std::cout << "1" << std::endl;
             clientBuff = df.clearBuf(clientBuff);
             //fgets(clientBuff.data(), clientBuff.size(), stdin);
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
-            std::string isCreating = "No";
+            std::string isCreating;
             //isCreating = df.convert_char_to_string(clientBuff, isCreating);
             std::string answerYes = "Yes";
             std::string answerNo  = "No" ;
+            if(iter_count_1 == 0)
+                isCreating = "Yes";
+            else if(iter_count_2 > 0)
+                isCreating = "No";
+            int iter_count_2 = 0;
             if(isCreating == answerYes)
             {
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Number players:"
@@ -117,7 +122,9 @@ std::cout << "1" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
                 clientBuff = df.clearBuf(clientBuff);
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                    std::string answer = "No";
+                    if(iter_count == 0) {
+                        std::string answer = "No";
+                        iter_count ; }
                     clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
                 std::string isConcrete;
@@ -130,7 +137,7 @@ std::cout << "1" << std::endl;
                         //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"
                         clientBuff = df.clearBuf(clientBuff);
                         //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                            answer = "4";
+                            std::string answer = "4";
                             clientBuff = df.convert_string_to_char(clientBuff, answer);
                         packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
                     }
@@ -139,7 +146,8 @@ std::cout << "1" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== get using GameID
                 std::string usingGameIDstring = df.convert_char_to_string(servBuff, usingGameIDstring);
                 usingGameID = stoi(usingGameIDstring);
-                isWork = false;                 // выходим из цикла Create Game
+                //isWork = false;                 // выходим из цикла Create Game
+                iter_count_1 ++;
             }
             else if(isCreating == answerNo)
             {
@@ -149,6 +157,10 @@ std::cout << "1" << std::endl;
                     clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if connection to Game
                 std::string isConnection;
+                    if(iter_count_2 > 1)
+                        isConnection = "No";
+                    if(iter_count_2 > 2)
+                        isConnection = "Yes";
                 isConnection = df.convert_char_to_string(clientBuff, isConnection);
                 if(isConnection == answerYes)
                 {
@@ -165,7 +177,7 @@ std::cout << "1" << std::endl;
                     if(isPlayerConection == answerYes)
                     {
                         usingGameID = stoi(usingGameIDstring);
-                        isWork = false;                 // выходим из цикла Create Game
+                        //isWork = false;                 // выходим из цикла Create Game
                     }
                 }
                 else if(isConnection == answerNo)
