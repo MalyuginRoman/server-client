@@ -65,7 +65,7 @@ std::cout << "_________________________________________________" << std::endl;
             clientBuff = df.convert_string_to_char(clientBuff, answer);
         packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
-        std::string answer;
+        //std::string answer;
         answer = df.convert_char_to_string(servBuff, answer);
         std::string isGood = "Your autorized!";
         if(answer == isGood)
