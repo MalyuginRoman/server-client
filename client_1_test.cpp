@@ -49,7 +49,7 @@ std::cout << "_________________________________________________" << std::endl;
     std::vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
     short packet_size = 0;
     bool isNeedAutorization = true;
-    int ClientSock_a = 220; // isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat);
+    int ClientSock_a = isConnect(ip_to_num, SERVER_PORT_NUM_A, erStat); // 220;
     while(isNeedAutorization)
     {
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
