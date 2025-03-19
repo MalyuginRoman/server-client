@@ -30,6 +30,7 @@ int isConnect(in_addr ip_to_num, short SERVER_PORT_NUM, int erStat)
 }
 int main(void)
 {
+    #ifdef test1
     dop_function df;
 std::cout << "_________________________________________________" << std::endl;
 std::cout << "        Start CLIENT 1                           " << std::endl;
@@ -277,5 +278,6 @@ std::cout << "End game create" << std::endl;
 std::cout << "End game" << std::endl;
 //--------------------------------------------------------------------------------
     }
+    #endif
     return 0;
 }
