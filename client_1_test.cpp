@@ -61,7 +61,7 @@ std::cout << "_________________________________________________" << std::endl;
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your password: "
         clientBuff = df.clearBuf(clientBuff);
         //fgets(clientBuff.data(), clientBuff.size(), stdin);                     // <== User write password
-            answer = "123";
+            std::string answer = "123";
             clientBuff = df.convert_string_to_char(clientBuff, answer);
         packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
@@ -114,7 +114,7 @@ std::cout << "End autorization" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
                 clientBuff = df.clearBuf(clientBuff);
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                    answer = "No";
+                    std::string answer = "No";
                     clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
                 std::string isConcrete;
@@ -142,7 +142,7 @@ std::cout << "End autorization" << std::endl;
             {
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Connection to Game? "
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                    answer = "Yes";
+                    std::string answer = "Yes";
                     clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if connection to Game
                 std::string isConnection;
