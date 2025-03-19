@@ -54,14 +54,14 @@ std::cout << "_________________________________________________" << std::endl;
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your login: "
         clientBuff = df.clearBuf(clientBuff);
         //fgets(clientBuff.data(), clientBuff.size(), stdin);                     // <== User write login
-            answer = "PetrPetrov";
+            std::string answer = "PetrPetrov";
             clientBuff = df.convert_string_to_char(clientBuff, answer);
         packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
         playerName = df.convert_char_to_string(clientBuff, playerName);
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);  // <== "Your password: "
         clientBuff = df.clearBuf(clientBuff);
         //fgets(clientBuff.data(), clientBuff.size(), stdin);                     // <== User write password
-            std::string answer = "123";
+            answer = "123";
             clientBuff = df.convert_string_to_char(clientBuff, answer);
         packet_size = send(ClientSock_a, clientBuff.data(), clientBuff.size(), 0);
         //packet_size = recv(ClientSock_a, servBuff.data(), servBuff.size(), 0);
