@@ -107,7 +107,7 @@ std::cout << "End autorization" << std::endl;
             std::string answerNo  = "No" ;
             if(iter_count_1 == 0)
                 isCreating = "Yes";
-            else if(iter_count_2 > 0)
+            else if(iter_count_1 > 0)
                 isCreating = "No";
             int iter_count_2 = 0;
             if(isCreating == answerYes)
@@ -122,10 +122,8 @@ std::cout << "End autorization" << std::endl;
                 //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Need concrete players?"
                 clientBuff = df.clearBuf(clientBuff);
                 //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                    if(iter_count == 0) {
-                        std::string answer = "No";
-                        iter_count ; }
-                    clientBuff = df.convert_string_to_char(clientBuff, answer);
+                std::string answer = "Yes";
+                clientBuff = df.convert_string_to_char(clientBuff, answer);
                 packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
                 std::string isConcrete;
                 isConcrete = df.convert_char_to_string(clientBuff, isConcrete);
@@ -137,7 +135,7 @@ std::cout << "End autorization" << std::endl;
                         //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Name concrete player"
                         clientBuff = df.clearBuf(clientBuff);
                         //fgets(clientBuff.data(), clientBuff.size(), stdin);
-                            std::string answer = "4";
+                            answer = "4";
                             clientBuff = df.convert_string_to_char(clientBuff, answer);
                         packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);  // Yes if concrete players
                     }
@@ -178,6 +176,7 @@ std::cout << "End autorization" << std::endl;
                     {
                         usingGameID = stoi(usingGameIDstring);
                         //isWork = false;                 // выходим из цикла Create Game
+                        iter_count_1 ++;
                     }
                 }
                 else if(isConnection == answerNo)
@@ -198,20 +197,24 @@ std::cout << "End autorization" << std::endl;
                         std::cout << "Game are ending "; //packet_size = recv(ClientSock_g, servBuff.data(), servBuff.size(), 0);  // <== "Game are ending"
                         std::cout << servBuff.data() << std::endl;
                     }
+                    iter_count_1 ++;
                 }
                 else
                 {
                     std::cout << "Invalid answer " << std::endl;
                     close(ClientSock_g);
+                    iter_count_1 ++;
                     return 1;
                 }
             }
             else
             {
                 std::cout << "Invalid answer " << std::endl;
+                iter_count_1 ++;
                 close(ClientSock_g);
             }
             close(ClientSock_g);
+            iter_count_1 ++;
             isNonStop = false;
         }
 std::cout << "End game create" << std::endl;
