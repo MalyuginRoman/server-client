@@ -103,7 +103,7 @@ std::cout << "2" << std::endl;
             packet_size = send(ClientSock_g, clientBuff.data(), clientBuff.size(), 0);
             std::string isCreating = "No";
 std::cout << "3" << std::endl;
-            isCreating = df.convert_char_to_string(clientBuff, isCreating);
+            //isCreating = df.convert_char_to_string(clientBuff, isCreating);
             std::string answerYes = "Yes";
             std::string answerNo  = "No" ;
             if(isCreating == answerYes)
