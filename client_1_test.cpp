@@ -165,7 +165,7 @@ std::cout << "4" << std::endl;
                     std::string isPlayerConection;
                     isPlayerConection = "Yes"; //df.convert_char_to_string(servBuff, isPlayerConection);
 std::cout << "5" << std::endl;
-                    if(isPlayerConection == "You are connection in game")
+                    if(isPlayerConection == answerYes)
                     {
                         usingGameID = stoi(usingGameIDstring);
                         isWork = false;                 // выходим из цикла Create Game
