@@ -203,6 +203,7 @@ std::cout << "5" << std::endl;
                 close(ClientSock_g);
             }
             close(ClientSock_g);
+            isNonStop = false;
         }
 std::cout << "End game create" << std::endl;
 //-------------------------------------------------------------------------------- Start game - UserAction raund by raund
